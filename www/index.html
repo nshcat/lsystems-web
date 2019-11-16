@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>lsystems-web</title>
+	  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Questrial">
+	  <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+	<div id="page">
+		<div id="left" class="box">
+			<div class="line">
+				<span class="label">Presets:</span>
+				<select id="selectPreset">
+					<option value="3">Penrose</option>
+					<option value="0">Plant</option>
+					<option value="1">Koch Snowflake</option>
+					<option value="4">Koch Snowflake (alt)</option>
+					<option value="2">Sirpinski Triangle</option>
+					<option value="5">Sirpinski Triangle (alt)</option>
+				</select>
+				<button id="loadPreset">Load</button>
+			</div>
+			<div class="line"><span class="label">Drawing Parameters:</span></div>
+			<div class="line">
+				<span class="label">Starting Angle:</span>
+				<input id="slide-StartAngle" type="range" min="0" max="360" step="1" value="65">
+				<input class="sliderbox" width=10px id="input-StartAngle" name="value" value="65">
+			</div>
+			<div class="line">
+				<span class="label">Angle Delta:</span>
+				<input id="slide-AngleDelta" type="range" min="0" max="360" step="1" value="23">
+				<input class="sliderbox" width=10px id="input-AngleDelta" name="value" value="23">
+			</div>
+			<div class="line">
+				<span class="label">Step:</span>
+				<input id="slide-Step" type="range" min="0" max="10" step="0.002" value="0.03">
+				<input class="sliderbox" width=10px id="input-Step" name="value" value="0.03">
+			</div>
+			<div class="line">
+				<span class="label">Iterations:</span>
+				<input id="slide-Iters" type="range" min="0" max="10" step="1" value="6">
+				<input class="sliderbox" width=10px id="input-Iters" name="value" value="6">
+			</div>
+			<div class="line">
+				<span class="label">Axiom:</span>
+				<input id="inputAxiom" type="input">
+			</div>
+			<div class="line">
+				<span class="label">Rules:</span>
+			</div>
+			<div id="rules-div">
+
+			</div>
+			<div class="line">
+				<button id="addRuleDivBtt" type="button" class="rightbutton">+</button>
+			</div>
+			</br></br>
+			<div class="line">
+				<span class="label">Interpretations:</span>
+			</div>
+			<div id="interp-div">
+
+			</div>
+			<div class="line">
+				<button id="addInterpDivBtt" type="button" class="rightbutton">+</button>
+			</div>
+		</div>
+		<div id="right" class="box">
+			<canvas id="rendertarget" class="rendertarget" ></canvas>
+		</div>
+	</div>
+    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+    <script src="./bootstrap.js"></script>
+  </body>
+</html>
