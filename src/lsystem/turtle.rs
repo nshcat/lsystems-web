@@ -1,0 +1,126 @@
+use wasm_bindgen::prelude::*;
+use crate::lsystem::DrawingParameters;
+use crate::lsystem::line::LineSegment;
+use crate::lsystem::Position2D;
+use crate::lsystem::line::Vertex;
+
+
+#[wasm_bindgen]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DrawOperation {
+	Forward = 0,
+	ForwardNoDraw = 1,
+	TurnRight = 2,
+	TurnLeft = 3,
+	SaveState = 4,
+	LoadState = 5,
+	Ignore = 6,
+	ForwardContracting = 7	// use length s^n, where n is the number of iterations and is the step size
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Vector2D {
+	x: f64,
+	y: f64
+}
+
+#[derive(Clone, Copy, Debug)]
+struct Turtle2DState {
+	position: Vector2D,
+	direction: Vector2D
+}
+
+pub struct Turtle2D {
+	draw_parameters: DrawingParameters,
+	contracted_length: f64,  // s^n for ForwardContracted
+	line_segments: Vec<LineSegment>,
+	current_state: Turtle2DState,
+	state_stack: Vec<Turtle2DState>,
+	cache_cos: f64,
+	cache_sin: f64
+}
+
+impl Turtle2D {
+	pub fn new(draw_parameters: DrawingParameters, num_iterations: u32) -> Turtle2D {
+		return Turtle2D {
+			draw_parameters: draw_parameters,
+			line_segments: Vec::new(),
+			contracted_length: draw_parameters.step.powf(num_iterations as f64),
+			state_stack: Vec::new(),
+			current_state: Turtle2DState {
+				position: Vector2D{ x: draw_parameters.start_position.x as f64, y: draw_parameters.start_position.y as f64 },
+				direction: Vector2D{ x: draw_parameters.start_angle.cos(), y: draw_parameters.start_angle.sin() }
+			},
+			cache_cos: draw_parameters.angle_delta.cos(),
+			cache_sin: draw_parameters.angle_delta.sin()
+		}	
+	}
+
+	pub fn execute(&mut self, commands: &[DrawOperation]) {
+		for command in commands {
+			match command {
+				DrawOperation::Forward => self.move_forward(self.draw_parameters.step, true),
+				DrawOperation::ForwardNoDraw => self.move_forward(self.draw_parameters.step, false),
+				DrawOperation::ForwardContracting => self.move_forward(self.contracted_length, true),
+				DrawOperation::TurnLeft => self.turn_left(),
+				DrawOperation::TurnRight => self.turn_right(),
+				DrawOperation::Ignore => (),
+				DrawOperation::SaveState => self.push_state(),
+				DrawOperation::LoadState => self.pop_state()
+			}
+		}
+	}
+
+	pub fn line_segments(& self) -> &Vec<LineSegment> {
+		return &self.line_segments;	
+	}
+
+	pub fn move_forward(&mut self, distance: f64, draw: bool) {
+		let old_position = self.current_state.position;
+		
+		let dx = distance * self.current_state.direction.x;
+		let dy = distance * -self.current_state.direction.y;
+
+		let new_position = Vector2D {
+			x: self.current_state.position.x + dx, 	
+			y: self.current_state.position.y + dy
+		};
+		
+		self.current_state.position = new_position;
+
+		if(draw) {
+			let begin = Vertex { x: old_position.x, y: old_position.y, z: 0.0 };
+			let end = Vertex { x: new_position.x, y: new_position.y, z: 0.0 };
+
+			self.line_segments.push(LineSegment{
+				begin: begin, end: end
+			});		
+		}
+	}
+
+	pub fn turn_right(&mut self) {
+		self.current_state.direction = Vector2D {
+			x: (self.current_state.direction.x * self.cache_cos) - (self.current_state.direction.y * (-self.cache_sin)),
+			y: (self.current_state.direction.x * (-self.cache_sin)) + self.current_state.direction.y * self.cache_cos
+		};
+	}
+
+	pub fn turn_left(&mut self) {
+		self.current_state.direction = Vector2D {
+			x: self.current_state.direction.x * self.cache_cos - self.current_state.direction.y * self.cache_sin,
+			y: self.current_state.direction.x * self.cache_sin + self.current_state.direction.y * self.cache_cos
+		};
+	}
+	
+	pub fn push_state(&mut self) {
+		self.state_stack.push(self.current_state.clone())
+	}
+
+	pub fn pop_state(&mut self) {
+		if(self.state_stack.len() > 0) {
+			self.current_state = self.state_stack.last().unwrap().clone();
+			self.state_stack.pop();
+		}
+	}
+}
