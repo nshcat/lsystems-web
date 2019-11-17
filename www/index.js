@@ -406,6 +406,32 @@ function loadSirpinski() {
     addInterp("+", "3");
 }
 
+function loadLeaf() {
+    setStart(60);
+    setDelta(15);
+    setStep(0.45);
+    setIterations(9);
+    setPosition(-2, -2);
+
+    setAxiom("G+GG+G[A][B]");
+
+    addRule("A", "[+A{.].C.}");
+    addRule("B", "[-B{.].C.}");
+    addRule("C", "^GvC");
+
+    addInterp("G", "0");
+    addInterp("-", "2");
+    addInterp("+", "3");
+    addInterp("[", "4");
+    addInterp("]", "5");
+    addInterp("{", "13");
+    addInterp("}", "14");
+    addInterp(".", "15");
+
+    addInterp("^", "9");
+    addInterp("v", "8");
+}
+
 function loadSirpinski2() {
     setStart(60);
     setDelta(120);
@@ -503,6 +529,9 @@ function loadPreset() {
             break;
         case "3":
             loadPenrose();
+            break;
+        case "6":
+            loadLeaf();
             break;
     }
 }
