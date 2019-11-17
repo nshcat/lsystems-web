@@ -223,10 +223,14 @@ function addInterpDiv() {
                     <option value="7">Forward (contracting)</option>
                     <option value="2">Turn Right</option>
                     <option value="3">Turn Left</option>
+                    <option value="9">Pitch Up</option>
+                    <option value="8">Pitch Down</option>               
+                    <option value="10">Roll Left</option>
+                    <option value="11">Roll Right</option>
+                    <option value="12">Turn Around</option>
                     <option value="4">Save State</option>
                     <option value="5">Load State</option>
-                    <option value="6">Ignore</option>
-                  
+                    <option value="6">Ignore</option>          
                  </select>
                  <button id=${bttid} type="button" class="rightbutton">-</button>
             `);
@@ -479,6 +483,16 @@ function retrieveDrawOperation(input) {
             return DrawOperation.Ignore;
         case "7":
             return DrawOperation.ForwardContracting;
+        case "8":
+            return DrawOperation.PitchDown;
+        case "9":
+            return DrawOperation.PitchUp;
+        case "10":
+            return DrawOperation.RollLeft;
+        case "11":
+            return DrawOperation.RollRight;
+        case "12":
+            return DrawOperation.TurnAround;
     }
 }
 
