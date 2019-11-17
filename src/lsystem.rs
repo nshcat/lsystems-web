@@ -138,7 +138,7 @@ impl LSystem {
 	}
 
 	pub fn interpret(&mut self) {
-		let mut turtle = Turtle2D::new(self.parameters, self.iterations);
+		let mut turtle = Turtle3D::new(self.parameters, self.iterations);
 
 		turtle.execute(&self.commands);
 

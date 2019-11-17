@@ -307,7 +307,7 @@ function loadSirpinski() {
     setDelta(120);
     setStep(0.45);
     setIterations(4);
-    setPosition(-3, 3);
+    setPosition(0, -3);
 
     setAxiom("F-G-G");
 
@@ -339,11 +339,11 @@ function loadSirpinski2() {
 }
 
 function loadFlower() {
-    setStart(65);
+    setStart(270);
     setDelta(23);
     setStep(0.03);
     setIterations(6);
-    setPosition(-2, 3);
+    setPosition(0, 2);
 
     setAxiom("X");
 
