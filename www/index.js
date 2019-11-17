@@ -12,6 +12,8 @@ var interpDivCounter = 0;
 var startX = 0;
 var startY = 0;
 
+var drawWireframe = true;
+
 $('#slide-StartAngle').on('input',function () {
     $("#input-StartAngle").val($(this).val());
     refreshDrawingParameters();
@@ -125,9 +127,86 @@ function onWindowResize() {
 }
 
 
-function retrieveLines() {
+function drawPolygons(polygons) {
+    var i = 0;
+
+    while(i < polygons.length) {
+        // Read number of vertices
+        const vertexCount = polygons[i];
+        i++;
+
+        // Read vertices
+        var vertices = new Array(vertexCount);
+
+        for(var j = 0; j < vertexCount; ++j) {
+            var vec = new three.Vector3(
+                polygons[ i + (j*3) + 0],
+                polygons[ i + (j*3) + 1],
+                polygons[ i + (j*3) + 2],
+            );
+
+            vertices[j] = vec;
+        }
+
+        var geometry = new three.BufferGeometry();
+        var rawVertices = [];
+
+        for(var j = 0; j < vertexCount; ++j) {
+            var vertex = vertices[j];
+
+            rawVertices.push(vertex.x);
+            rawVertices.push(-vertex.y);
+            rawVertices.push(vertex.z);
+        }
+
+        geometry.setAttribute('position', new three.Float32BufferAttribute(rawVertices, 3));
+
+        if(drawWireframe) {
+            var material = new three.MeshPhongMaterial( {
+                color: 0xff0000,
+                polygonOffset: true,
+                polygonOffsetFactor: 1, // positive value pushes polygon further away
+                polygonOffsetUnits: 1
+            } );
+
+            material.side = three.DoubleSide;
+            var mesh = new three.Mesh(geometry, material);
+            scene.add(mesh);
+
+            var geo = new three.EdgesGeometry( mesh.geometry ); // or WireframeGeometry
+            var mat = new three.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );
+            var wireframe = new three.LineSegments( geo, mat );
+            mesh.add( wireframe );
+
+        } else {
+            var material = new three.MeshBasicMaterial({color: 0xFFFFFF});
+            material.side = three.DoubleSide;
+            var mesh = new three.Mesh(geometry, material);
+            mesh.drawMode = three.TriangleFanDrawMode;
+
+            scene.add(mesh);
+        }
+
+        i += vertexCount * 3;
+    }
+}
+
+function refreshScene() {
     scene = new three.Scene();
 
+    retrieveLines();
+    retrievePolygons();
+}
+
+function retrievePolygons() {
+    const polyPtr = lsystem.retrieve_polygons();
+    const polyLen = lsystem.retrieve_polygons_length();
+    const buffer = new Float64Array(memory.buffer, polyPtr, polyLen);
+    drawPolygons(buffer)
+}
+
+
+function retrieveLines() {
     const linePtr = lsystem.retrieve_lines();
     const lineLen = lsystem.retrieve_lines_length();
     const buffer = new Float64Array(memory.buffer, linePtr, lineLen);
@@ -147,7 +226,7 @@ function refreshDrawingParameters() {
     // We only need to reinterpret the already iterated axiom, since the changes only affect displaying.
     lsystem.interpret();
 
-    retrieveLines();
+    refreshScene();
 }
 
 /**
@@ -229,7 +308,10 @@ function addInterpDiv() {
                     <option value="11">Roll Right</option>
                     <option value="12">Turn Around</option>
                     <option value="4">Save State</option>
-                    <option value="5">Load State</option>
+                    <option value="5">Load State</option>                  
+                    <option value="13">Begin Polygon</option>
+                    <option value="15">Submit Vertex</option>
+                    <option value="14">End Polygon</option>                    
                     <option value="6">Ignore</option>          
                  </select>
                  <button id=${bttid} type="button" class="rightbutton">-</button>
@@ -493,6 +575,12 @@ function retrieveDrawOperation(input) {
             return DrawOperation.RollRight;
         case "12":
             return DrawOperation.TurnAround;
+        case "13":
+            return DrawOperation.BeginPolygon;
+        case "14":
+            return DrawOperation.EndPolygon;
+        case "15":
+            return DrawOperation.SubmitVertex;
     }
 }
 

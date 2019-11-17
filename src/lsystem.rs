@@ -9,6 +9,8 @@ use turtle::*;
 use line::*;
 use js_sys::Float64Array;
 use std::convert::TryInto;
+use crate::lsystem::turtle::Polygon;
+
 
 #[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -129,7 +131,8 @@ pub struct LSystem {
 	parameters: DrawingParameters,
 	command_string: String,			// Drawing commands as source string. For debugging.
 	commands: Vec<DrawOperation>,  // List of drawing commands that can be interpreted using drawing parameters
-	line_segments: Vec<LineSegment> // List of line segments which are the current interpretation of the lsystem based on the current drawing parameters
+	line_segments: Vec<LineSegment>, // List of line segments which are the current interpretation of the lsystem based on the current drawing parameters
+	polygons: Vec<Polygon>
 }
 
 impl LSystem {
@@ -143,6 +146,7 @@ impl LSystem {
 		turtle.execute(&self.commands);
 
 		self.line_segments = turtle.line_segments().clone();
+		self.polygons = turtle.polygons().clone();
 	}
 
 	// Perform L-System iteration by applying ruleset to axiom string
@@ -182,7 +186,8 @@ impl LSystem {
 			interpretation_map: InterpretationMap::new(),
 			parameters: DrawingParameters::new(),
 			commands: Vec::new(),
-			line_segments: Vec::new()
+			line_segments: Vec::new(),
+			polygons: Vec::new()
 		};
 
 		/*x.line_segments.push(
@@ -197,13 +202,14 @@ impl LSystem {
 #[wasm_bindgen]
 pub struct LSystemInterface {
 	lsystem: LSystem,
-	line_vertices: Vec<f64>
+	line_vertices: Vec<f64>,
+	polygons: Vec<f64>
 }
 
 #[wasm_bindgen]
 impl LSystemInterface {
 	pub fn new() -> LSystemInterface {
-		return LSystemInterface{ lsystem: LSystem::new(), line_vertices: Vec::new() };
+		return LSystemInterface{ lsystem: LSystem::new(), line_vertices: Vec::new(), polygons: Vec::new() };
 	}
 
 	pub fn set_iterations(&mut self, iterations: u32) {
@@ -262,6 +268,28 @@ impl LSystemInterface {
 
 	pub fn retrieve_lines_length(&mut self) -> usize {
 		return self.line_vertices.len();	
+	}
+
+	pub fn retrieve_polygons(&mut self) -> *const f64 {
+
+		let mut data = Vec::new();
+
+		for polygon in &self.lsystem.polygons {
+			data.push(polygon.vertices.len() as f64);
+	
+			for vertex in &polygon.vertices {
+				data.push(vertex.x);
+				data.push(vertex.y);
+				data.push(vertex.z);
+			}
+		}
+
+		self.polygons = data;
+		return self.polygons.as_ptr();
+	}
+
+	pub fn retrieve_polygons_length(&mut self) -> usize {
+		return self.polygons.len();	
 	}
 }
 

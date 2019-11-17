@@ -27,7 +27,11 @@ pub enum DrawOperation {
 	PitchUp = 9,
 	RollLeft = 10,
 	RollRight = 11,
-	TurnAround = 12
+	TurnAround = 12,
+
+	BeginPolygon = 13,
+	EndPolygon = 14,
+	SubmitVertex = 15
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -186,6 +190,11 @@ impl Turtle3DMatrixCache {
 	}
 }
 
+#[derive(Clone, Debug)]
+pub struct Polygon {
+	pub vertices: Vec<Vector3f>
+}
+
 #[derive(Clone, Copy, Debug)]
 struct Turtle3DState {
 	position: Vector3f,
@@ -215,7 +224,9 @@ pub struct Turtle3D {
 	matrix_cache: Turtle3DMatrixCache,
 	line_segments: Vec<LineSegment>,
 	current_state: Turtle3DState,
-	state_stack: Vec<Turtle3DState>
+	state_stack: Vec<Turtle3DState>,
+	current_polygon: Vec<Vector3f>,
+	polygons: Vec<Polygon>
 }
 
 impl Turtle3D {
@@ -226,11 +237,35 @@ impl Turtle3D {
 			contracted_length: draw_parameters.step.powf(num_iterations as f64),
 			state_stack: Vec::new(),
 			matrix_cache: Turtle3DMatrixCache::new(draw_parameters.angle_delta),
+			current_polygon: Vec::new(),
+			polygons: Vec::new(),
 			current_state: Turtle3DState::new(
 				Vector3f::new(draw_parameters.start_position.x as f64, draw_parameters.start_position.y as f64, 0.0),
 				draw_parameters.start_angle
 			)
 		}	
+	}
+
+	fn is_polygon_active(&self) -> bool {
+		return !self.current_polygon.is_empty();
+	}
+
+	fn submit_vertex(&mut self) {
+		self.current_polygon.push(self.current_state.position.clone());
+	}
+
+	fn begin_polygon(&mut self) {
+		// Nothing to do
+	}
+
+	fn end_polygon(&mut self) {
+		self.polygons.push(
+			Polygon {
+				vertices: self.current_polygon.clone()			
+			}
+		);
+
+		self.current_polygon.clear();
 	}
 
 	fn apply_rotation(&mut self, matrix: Matrix3f) {
@@ -264,13 +299,21 @@ impl Turtle3D {
 				DrawOperation::PitchUp => self.apply_rotation(self.matrix_cache.pitch_up),
 				DrawOperation::RollLeft => self.apply_rotation(self.matrix_cache.roll_left),
 				DrawOperation::RollRight => self.apply_rotation(self.matrix_cache.roll_right),
-				DrawOperation::TurnAround => self.apply_rotation(self.matrix_cache.turn_around)
+				DrawOperation::TurnAround => self.apply_rotation(self.matrix_cache.turn_around),
+
+				DrawOperation::BeginPolygon => self.begin_polygon(),
+				DrawOperation::EndPolygon => self.end_polygon(),
+				DrawOperation::SubmitVertex => self.submit_vertex(),
 			}
 		}
 	}
 
 	pub fn line_segments(& self) -> &Vec<LineSegment> {
 		return &self.line_segments;	
+	}
+
+	pub fn polygons(& self) -> &Vec<Polygon> {
+		return &self.polygons;	
 	}
 
 	pub fn move_forward(&mut self, distance: f64, draw: bool) {
