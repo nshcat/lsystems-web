@@ -3,8 +3,9 @@ import { LSystemInterface, DrawOperation, DrawingParameters } from "lsystems-web
 import { memory } from "lsystems-web/lsystems_web_bg";
 import * as three from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
-import "bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+import "jquery";
+import "popper.js";
+import "bootstrap-select";
 
 var $ = require("jquery");
 
@@ -73,11 +74,40 @@ $('#slide-Iters').on('input', function () {
     extractLSystemConfig();
 });
 
-$('#loadPreset').on('click', function () {
-    loadPreset();
+$('#preset0').on('click', function () {
+    loadPreset(0);
     extractLSystemConfig();
 });
 
+$('#preset1').on('click', function () {
+    loadPreset(1);
+    extractLSystemConfig();
+});
+
+$('#preset2').on('click', function () {
+    loadPreset(2);
+    extractLSystemConfig();
+});
+
+$('#preset3').on('click', function () {
+    loadPreset(3);
+    extractLSystemConfig();
+});
+
+$('#preset4').on('click', function () {
+    loadPreset(4);
+    extractLSystemConfig();
+});
+
+$('#preset5').on('click', function () {
+    loadPreset(5);
+    extractLSystemConfig();
+});
+
+$('#preset6').on('click', function () {
+    loadPreset(6);
+    extractLSystemConfig();
+});
 
 
 var canvas = document.getElementById('rendertarget');
@@ -112,9 +142,7 @@ drawingParms.set_angle_delta_degrees(60.0);
 
 var lsystem = LSystemInterface.new();
 
-loadPreset();
-
-
+loadPreset(3);
 
 window.addEventListener('resize', onWindowResize, false);
 
@@ -258,7 +286,7 @@ function addRuleDiv() {
                  <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>
                  <span width="40%">-></span>
                  <input id=${rightsideid} class="ruleboxright" type="text"/>
-                 <button id=${bttid} type="button" class="rightbutton">-</button>
+                 <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
             `);
 
     $('#rules-div').append(div);
@@ -298,25 +326,33 @@ function addInterpDiv() {
         .html(`
                  <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>
                  <span>-></span>
-                 <select class="ruleboxright" id=${rightsideid}>
-                    <option value="0">Forward</option>
-                    <option value="1">Forward (no draw)</option>
-                    <option value="7">Forward (contracting)</option>
-                    <option value="2">Turn Right</option>
-                    <option value="3">Turn Left</option>
-                    <option value="9">Pitch Up</option>
-                    <option value="8">Pitch Down</option>               
-                    <option value="10">Roll Left</option>
-                    <option value="11">Roll Right</option>
-                    <option value="12">Turn Around</option>
-                    <option value="4">Save State</option>
-                    <option value="5">Load State</option>                  
-                    <option value="13">Begin Polygon</option>
-                    <option value="15">Submit Vertex</option>
-                    <option value="14">End Polygon</option>                    
-                    <option value="6">Ignore</option>          
+                 <select id=${rightsideid} data-dropup-auto="false">
+                    <optgroup label="Movement">
+                        <option value="0">Forward</option>
+                        <option value="1">Forward (no draw)</option>
+                        <option value="7">Forward (contracting)</option>
+                        <option value="2">Turn Right</option>
+                        <option value="3">Turn Left</option>
+                        <option value="9">Pitch Up</option>
+                        <option value="8">Pitch Down</option>               
+                        <option value="10">Roll Left</option>
+                        <option value="11">Roll Right</option>
+                        <option value="12">Turn Around</option>
+                    </optgroup>
+                    <optgroup label="State Handling">
+                        <option value="4">Save State</option>
+                        <option value="5">Load State</option>    
+                    </optgroup>         
+                    <optgroup label="Polygons">
+                        <option value="13">Begin Polygon</option>
+                        <option value="15">Submit Vertex</option>
+                        <option value="14">End Polygon</option>       
+                    </optgroup>      
+                    <optgroup label="Special">       
+                        <option value="6">Ignore</option>   
+                    </optgroup>         
                  </select>
-                 <button id=${bttid} type="button" class="rightbutton">-</button>
+                 <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
             `);
 
     $('#interp-div').append(div);
@@ -325,13 +361,15 @@ function addInterpDiv() {
         extractLSystemConfig();
     });
 
-    $('#' + rightsideid).on('input', function(){
+    $('#' + rightsideid).on('change', function(){
         extractLSystemConfig();
     });
 
     $('#' + bttid).on('click', function(){
         handleRemoveRule(id);
     });
+
+    $('select').selectpicker();
 
     interpDivCounter++;
 }
@@ -504,35 +542,34 @@ function loadKoch() {
     addInterp("+", "3");
 }
 
-function loadPreset() {
+function loadPreset(idx) {
     $('#interp-div').empty();
     $('#rules-div').empty();
 
     interpDivCounter = 0;
     ruleDivCounter = 0;
 
-    var presetId = $('#selectPreset').val();
 
-    switch(presetId) {
-        case "0":
+    switch(idx) {
+        case 0:
             loadFlower();
             break;
-        case "1":
+        case 1:
             loadKoch();
             break;
-        case "4":
+        case 4:
             loadKoch2();
             break;
-        case "2":
+        case 2:
             loadSirpinski();
             break;
-        case "5":
+        case 5:
             loadSirpinski2();
             break;
-        case "3":
+        case 3:
             loadPenrose();
             break;
-        case "6":
+        case 6:
             loadLeaf();
             break;
     }
@@ -576,6 +613,7 @@ function addInterp(left, right) {
 
     $('#interpleftside' + idx).val(left);
     $('#interprightside' + idx).val(right);
+    $('#interprightside' + idx).selectpicker('render');
 }
 
 function retrieveDrawOperation(input) {
@@ -714,6 +752,9 @@ function drawLines(lines, color = 0xFFFFFF) {
     scene.add(line);
 }
 
+$(function () {
+    $('select').selectpicker();
+});
 
 function animate()
 {
@@ -723,3 +764,4 @@ function animate()
 }
 
 animate();
+

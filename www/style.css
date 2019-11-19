@@ -18,17 +18,22 @@ html, body {
 }
 #left
 {
-    width: 30%;
+    width: 36%;
     background: #ffffff;
     margin-right: 5px;
 }
 #right{
-    width: calc(70% - 5px);
+    width: calc(64% - 5px);
     background: #ffffff;
 }
 .line {
     padding: 5px;
 }
+.slider {
+    width: 65%;
+    margin-right: 5px;
+}
+
 .label {
     display: inline-block;
     width: 45%;
@@ -44,7 +49,8 @@ html, body {
 
 .rightbutton {
     float: right;
-    width: 20px;
+    width: 34px;
+    height: 34px;
 }
 
 .sliderbox {
