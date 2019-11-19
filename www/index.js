@@ -3,6 +3,8 @@ import { LSystemInterface, DrawOperation, DrawingParameters } from "lsystems-web
 import { memory } from "lsystems-web/lsystems_web_bg";
 import * as three from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
+import "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 var $ = require("jquery");
 
