@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "bootstrap-select": "^1.13.12",
+    "bootstrap-slider": "^10.6.2",
     "tether": "^1.4.7"
   }
 }

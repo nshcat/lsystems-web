@@ -6,6 +6,7 @@ import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
 import "jquery";
 import "popper.js";
 import "bootstrap-select";
+import "bootstrap-slider"
 
 var $ = require("jquery");
 
@@ -280,7 +281,7 @@ function addRuleDiv() {
     var rightsideid = 'rulerightside' + ruleDivCounter;
 
     var div = $('<div></div>')
-        .prop('class', 'line')
+        .prop('class', 'ruleline')
         .prop('id', id)
         .html(`
                  <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>

@@ -29,6 +29,9 @@ html, body {
 .line {
     padding: 5px;
 }
+.ruleline {
+    padding: 10px;
+}
 .slider {
     width: 65%;
     margin-right: 5px;
