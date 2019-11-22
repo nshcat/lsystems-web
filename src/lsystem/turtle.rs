@@ -4,6 +4,7 @@ use crate::lsystem::DrawingParameters;
 use crate::lsystem::line::LineSegment;
 use crate::lsystem::Position2D;
 use crate::lsystem::line::Vertex;
+use std::num::*;
 
 type Matrix3f = Matrix3<f64>;
 type Vector3f = Vector3<f64>;
@@ -31,7 +32,10 @@ pub enum DrawOperation {
 
 	BeginPolygon = 13,
 	EndPolygon = 14,
-	SubmitVertex = 15
+	SubmitVertex = 15,
+
+	IncrementColor = 16,
+	DecrementColor = 17
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -110,7 +114,7 @@ impl Turtle2D {
 			let end = Vertex { x: new_position.x, y: new_position.y, z: 0.0 };
 
 			self.line_segments.push(LineSegment{
-				begin: begin, end: end
+				begin: begin, end: end, color: 0
 			});		
 		}
 	}
@@ -192,7 +196,8 @@ impl Turtle3DMatrixCache {
 
 #[derive(Clone, Debug)]
 pub struct Polygon {
-	pub vertices: Vec<Vector3f>
+	pub vertices: Vec<Vector3f>,
+	pub color: i32
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -201,6 +206,7 @@ struct Turtle3DState {
 	heading: Vector3fU,
 	left: Vector3fU,
 	up: Vector3fU,
+	color_index: i32
 }
 
 impl Turtle3DState {
@@ -213,7 +219,8 @@ impl Turtle3DState {
 			up: up,
 			heading: heading,
 			left: left,
-			position: start_position
+			position: start_position,
+			color_index: 0
 		};
 	}
 }
@@ -261,7 +268,8 @@ impl Turtle3D {
 	fn end_polygon(&mut self) {
 		self.polygons.push(
 			Polygon {
-				vertices: self.current_polygon.clone()			
+				vertices: self.current_polygon.clone(),
+				color: self.current_state.color_index		
 			}
 		);
 
@@ -304,8 +312,15 @@ impl Turtle3D {
 				DrawOperation::BeginPolygon => self.begin_polygon(),
 				DrawOperation::EndPolygon => self.end_polygon(),
 				DrawOperation::SubmitVertex => self.submit_vertex(),
+				
+				DrawOperation::IncrementColor => self.modify_color_index(1),
+				DrawOperation::DecrementColor => self.modify_color_index(1),
 			}
 		}
+	}
+
+	fn modify_color_index(&mut self, value: i32) {
+		self.current_state.color_index = clamp(self.current_state.color_index + value, 0, (self.draw_parameters.color_palette_size - 1) as i32);
 	}
 
 	pub fn line_segments(& self) -> &Vec<LineSegment> {
@@ -328,7 +343,7 @@ impl Turtle3D {
 			let end = Vertex { x: self.current_state.position.x, y: self.current_state.position.y, z: self.current_state.position.z };
 
 			self.line_segments.push(LineSegment{
-				begin: begin, end: end
+				begin: begin, end: end, color: self.current_state.color_index
 			});		
 		}
 	}

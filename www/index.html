@@ -17,7 +17,7 @@
 	<div id="page">
 		<div id="left" class="box">
 			<ul class="nav nav-tabs">
-				<li class="active"><a data-toggle="tab" href="#params">Drawing Parameters</a></li>
+				<li class="active"><a data-toggle="tab" href="#params">Parameters</a></li>
 				<li><a data-toggle="tab" href="#rules">Rules</a></li>
 				<li><a data-toggle="tab" href="#interp">Interpretation</a></li>
 				<li><a data-toggle="tab" href="#colors">Colors</a></li>
@@ -59,6 +59,9 @@
 							<input id="slide-Iters" class="slider form-control" type="range" min="0" max="10" step="1" value="6">
 							<input class="sliderbox" width=10px id="input-Iters" name="value" value="6">
 						</div>
+						<div class="checkbox">
+							<label><input id="chkBoxWireframe" type="checkbox">Draw polygons with wireframe</label>
+						</div>
 					</div>
 				</div>
 				<div id="rules" class="tab-pane">
@@ -88,6 +91,23 @@
 					</div>
 				</div>
 				<div id="colors" class="tab-pane">
+					<div class="clrline input-color">
+						Color 1:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color1" style="background-color: #FFFFFF;"></div>
+						<!-- Replace "#FF850A" to change the color -->
+					</div>
+					<div class="clrline input-color">
+						Color 2:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color2" style="background-color: #FFFFFF;"></div>
+						<!-- Replace "#FF850A" to change the color -->
+					</div>
+					<div class="clrline input-color">
+						Color 3:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color3" style="background-color: #FFFFFF;"></div>
+					</div>
 				</div>
 			</div>
 		</div>

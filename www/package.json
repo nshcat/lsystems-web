@@ -38,6 +38,7 @@
     "lsystems-web": "file:../pkg",
     "three": "^0.110.0",
     "bootstrap": "^4.3.1",
+    "bootstrap-colorpicker": "=2.5.3",
     "three-trackballcontrols": "^0.0.8",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",

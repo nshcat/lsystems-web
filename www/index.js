@@ -7,6 +7,8 @@ import "jquery";
 import "popper.js";
 import "bootstrap-select";
 import "bootstrap-slider"
+import "bootstrap-colorpicker"
+import "bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"
 
 var $ = require("jquery");
 
@@ -16,7 +18,9 @@ var interpDivCounter = 0;
 var startX = 0;
 var startY = 0;
 
-var drawWireframe = true;
+var colorPalette = [ new three.Color(255, 255, 255), new three.Color(255, 255, 255), new three.Color(255, 255, 255) ];
+
+var drawWireframe = false;
 
 $('#slide-StartAngle').on('input',function () {
     $("#input-StartAngle").val($(this).val());
@@ -110,6 +114,38 @@ $('#preset6').on('click', function () {
     extractLSystemConfig();
 });
 
+$('#chkBoxWireframe').on('click', function () {
+    drawWireframe = $('#chkBoxWireframe').is(":checked");
+    refreshScene();
+});
+
+$('#color1').colorpicker();
+
+$('#color1').on('changeColor', function(event) {
+    $('#color1').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[0] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
+
+$('#color2').colorpicker();
+
+$('#color2').on('changeColor', function(event) {
+    $('#color2').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[1] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
+
+$('#color3').colorpicker();
+
+$('#color3').on('changeColor', function(event) {
+    $('#color3').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[2] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
+
 
 var canvas = document.getElementById('rendertarget');
 //canvas.style.width ='100%';
@@ -166,6 +202,13 @@ function drawPolygons(polygons) {
         const vertexCount = polygons[i];
         i++;
 
+        // Read color
+        const colorIndex = polygons[i];
+        const color = colorPalette[colorIndex];
+        i++;
+
+        console.log("Color Index:", colorIndex, "Color:", color);
+
         // Read vertices
         var vertices = new Array(vertexCount);
 
@@ -196,7 +239,7 @@ function drawPolygons(polygons) {
 
         if(drawWireframe) {
             var material = new three.MeshPhongMaterial( {
-                color: 0xff0000,
+                color: color,
                 polygonOffset: true,
                 polygonOffsetFactor: 1, // positive value pushes polygon further away
                 polygonOffsetUnits: 1
@@ -212,7 +255,7 @@ function drawPolygons(polygons) {
             mesh.add( wireframe );
 
         } else {
-            var material = new three.MeshPhongMaterial({ ambient: 0x050505, color: 0x0033ff, specular: 0x555555, shininess: 30 });
+            var material = new three.MeshPhongMaterial({ ambient: color, color: color, specular: color, shininess: 30 });
             material.side = three.DoubleSide;
             var mesh = new three.Mesh(geometry, material);
             mesh.drawMode = three.TriangleFanDrawMode;
@@ -261,6 +304,7 @@ function refreshDrawingParameters() {
     drawingParams.set_start_angle_degrees($('#slide-StartAngle').val());
     drawingParams.set_step($('#slide-Step').val());
     drawingParams.set_start_position(startX, startY);
+    drawingParams.set_color_palette_size(3);
 
     lsystem.set_draw_parameters(drawingParams);
 
@@ -717,47 +761,48 @@ extractLSystemConfig();
  * @param lines An array of float values. three values make up a vertex, and two vertices make up a line.
  * @param color The line color, white per default.
  */
-function drawLines(lines, color = 0xFFFFFF) {
-    // Determine how many vertices are contained in the parameter array
-    if(lines.length % 3 !== 0) {
-        console.error("Expected array of 3D vertices, but length does not match up")
-        return
-    }
-
-    var numVertices = lines.length / 3;
-    var numLineSegments = numVertices / 2;
-
-    // Check that there is an even number of vertices, since each line segment consists
-    // of both a begin and end position.
-    if(numVertices % 2 !== 0) {
-        console.error("Expected even number of vertices");
-        return
-    }
+function drawLines(lines) {
+    var i = 0;
 
     var geometry = new three.Geometry();
 
-    for(var i = 0; i < numLineSegments; i++)
+    var clrs = [];
+
+    while(i < lines.length)
     {
-        var startIdx = 6*i;
-        var beginVertexIdx = startIdx;
-        var endVertexIdx = startIdx + 3;
+        const clrIdx = lines[i];
+        i++;
+        const color = colorPalette[clrIdx];
 
         var beginVertex = new three.Vector3(
-            lines[beginVertexIdx + 0],
-            -lines[beginVertexIdx + 1],
-            lines[beginVertexIdx + 2]
+            lines[i],
+            -lines[i+1],
+            lines[i+2]
         );
 
+        i = i + 3;
+
         var endVertex = new three.Vector3(
-            lines[endVertexIdx + 0],
-            -lines[endVertexIdx + 1],
-            lines[endVertexIdx + 2]
+            lines[i],
+            -lines[i+1],
+            lines[i+2]
         );
+
+        i = i + 3;
+
+        clrs.push(color);
+        clrs.push(color);
 
         geometry.vertices.push(beginVertex, endVertex);
     }
+
+    for(var i=0; i<geometry.vertices.length; i++) {
+        geometry.colors[i] = clrs[i];
+    }
+
     var material = new three.LineBasicMaterial({
-        color: color
+        color: 0xffffff,
+        vertexColors: three.VertexColors
     });
 
     var line = new three.LineSegments(geometry, material);

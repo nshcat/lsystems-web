@@ -18,7 +18,7 @@ html, body {
 }
 #left
 {
-    width: 36%;
+    width: 33%;
     background: #ffffff;
     margin-right: 5px;
 }
@@ -28,6 +28,9 @@ html, body {
 }
 .line {
     padding: 5px;
+}
+.clrline {
+    left: 50px;
 }
 .ruleline {
     padding: 10px;
@@ -68,9 +71,26 @@ html, body {
     width: 45%;
 }
 
-input {
-    width: calc(100% - 110px);
+.input-color {
+    position: relative;
 }
+.input-color input {
+    padding-left: 20px;
+}
+.input-color .color-box {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-color: #ccc;
+    position: relative;
+    left: 25px;
+    top: 5px;
+    border: 1px solid black;
+}
+
+/*input {
+    width: calc(100% - 110px);
+}*/
 input[type="range"]::-moz-range-progress {
     height:10px;
     border-radius:8px;
