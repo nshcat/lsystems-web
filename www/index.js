@@ -405,6 +405,8 @@ function addInterpDiv() {
                     </optgroup>      
                     <optgroup label="Special">       
                         <option value="6">Ignore</option>   
+                        <option value="16">Increment Color</option>   
+                        <option value="17">Decrement Color</option>   
                     </optgroup>         
                  </select>
                  <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
@@ -706,6 +708,10 @@ function retrieveDrawOperation(input) {
             return DrawOperation.EndPolygon;
         case "15":
             return DrawOperation.SubmitVertex;
+        case "16":
+            return DrawOperation.IncrementColor;
+        case "17":
+            return DrawOperation.DecrementColor;
     }
 }
 
