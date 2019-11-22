@@ -192,6 +192,8 @@ function drawPolygons(polygons) {
 
         geometry.setAttribute('position', new three.Float32BufferAttribute(rawVertices, 3));
 
+        geometry.computeVertexNormals();
+
         if(drawWireframe) {
             var material = new three.MeshPhongMaterial( {
                 color: 0xff0000,
@@ -210,7 +212,7 @@ function drawPolygons(polygons) {
             mesh.add( wireframe );
 
         } else {
-            var material = new three.MeshBasicMaterial({color: 0xFFFFFF});
+            var material = new three.MeshPhongMaterial({ ambient: 0x050505, color: 0x0033ff, specular: 0x555555, shininess: 30 });
             material.side = three.DoubleSide;
             var mesh = new three.Mesh(geometry, material);
             mesh.drawMode = three.TriangleFanDrawMode;
@@ -224,6 +226,14 @@ function drawPolygons(polygons) {
 
 function refreshScene() {
     scene = new three.Scene();
+
+    var light = new three.AmbientLight(0x404040);
+    var light2 = new three.DirectionalLight(0x404040);
+    light2.position.set( 0, 1, 1 ).normalize();
+
+    scene.add(light);
+    scene.add(light2);
+
 
     retrieveLines();
     retrievePolygons();
@@ -458,9 +468,10 @@ function loadLeaf() {
 
     addRule("A", "[+A{.].C.}");
     addRule("B", "[-B{.].C.}");
-    addRule("C", "^GvC");
+    addRule("C", "^FvC");
 
     addInterp("G", "0");
+    addInterp("F", "1");
     addInterp("-", "2");
     addInterp("+", "3");
     addInterp("[", "4");
