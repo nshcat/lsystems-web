@@ -13,5 +13,6 @@ pub struct Vertex {
 pub struct LineSegment {
 	pub begin: Vertex,
 	pub end: Vertex,
-	pub color: i32
+	pub color: i32,
+	pub width: f64
 }

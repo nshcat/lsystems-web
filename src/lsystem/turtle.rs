@@ -5,6 +5,7 @@ use crate::lsystem::line::LineSegment;
 use crate::lsystem::Position2D;
 use crate::lsystem::line::Vertex;
 use std::num::*;
+use std::cmp::*;
 
 type Matrix3f = Matrix3<f64>;
 type Vector3f = Vector3<f64>;
@@ -35,7 +36,9 @@ pub enum DrawOperation {
 	SubmitVertex = 15,
 
 	IncrementColor = 16,
-	DecrementColor = 17
+	DecrementColor = 17,
+	IncrementLineWidth = 18,
+	DecrementLineWidth = 19
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -114,7 +117,7 @@ impl Turtle2D {
 			let end = Vertex { x: new_position.x, y: new_position.y, z: 0.0 };
 
 			self.line_segments.push(LineSegment{
-				begin: begin, end: end, color: 0
+				begin: begin, end: end, color: 0, width: 1.0
 			});		
 		}
 	}
@@ -206,11 +209,12 @@ struct Turtle3DState {
 	heading: Vector3fU,
 	left: Vector3fU,
 	up: Vector3fU,
-	color_index: i32
+	color_index: i32,
+	line_width: f64
 }
 
 impl Turtle3DState {
-	fn new(start_position: Vector3f, start_angle: f64) -> Turtle3DState {
+	fn new(start_position: Vector3f, start_angle: f64, initial_line_width: f64) -> Turtle3DState {
 		let up = Vector3f::z_axis();
 		let heading = Vector3fU::new_unchecked(Vector3f::new(start_angle.cos(), start_angle.sin(), 0.0));
 		let left = Vector3fU::new_normalize(up.cross(&heading));
@@ -220,7 +224,8 @@ impl Turtle3DState {
 			heading: heading,
 			left: left,
 			position: start_position,
-			color_index: 0
+			color_index: 0,
+			line_width: initial_line_width
 		};
 	}
 }
@@ -248,7 +253,8 @@ impl Turtle3D {
 			polygons: Vec::new(),
 			current_state: Turtle3DState::new(
 				Vector3f::new(draw_parameters.start_position.x as f64, draw_parameters.start_position.y as f64, 0.0),
-				draw_parameters.start_angle
+				draw_parameters.start_angle,
+				draw_parameters.initial_line_width
 			)
 		}	
 	}
@@ -290,6 +296,9 @@ impl Turtle3D {
 		self.current_state.up = Vector3fU::new_normalize(new_composite.column(2).into());
 	}
 
+	pub fn modify_line_width(&mut self, delta: f64) {
+		self.current_state.line_width = (self.current_state.line_width + delta).max(0.0);	
+	}
 
 	pub fn execute(&mut self, commands: &[DrawOperation]) {
 		for command in commands {
@@ -315,6 +324,9 @@ impl Turtle3D {
 				
 				DrawOperation::IncrementColor => self.modify_color_index(1),
 				DrawOperation::DecrementColor => self.modify_color_index(1),
+
+				DrawOperation::IncrementLineWidth => self.modify_line_width(self.draw_parameters.line_width_delta),
+				DrawOperation::DecrementLineWidth => self.modify_line_width(-self.draw_parameters.line_width_delta)
 			}
 		}
 	}
@@ -343,7 +355,10 @@ impl Turtle3D {
 			let end = Vertex { x: self.current_state.position.x, y: self.current_state.position.y, z: self.current_state.position.z };
 
 			self.line_segments.push(LineSegment{
-				begin: begin, end: end, color: self.current_state.color_index
+				begin: begin,
+				end: end,
+				color: self.current_state.color_index,
+				width: self.current_state.line_width
 			});		
 		}
 	}

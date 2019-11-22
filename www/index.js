@@ -55,6 +55,23 @@ $('#input-Iters').on('input', function(){
     refreshDrawingParameters();
 });
 
+$('#slide-Thickness').on('input',function () {
+    $("#input-Thickness").val($(this).val());
+    refreshDrawingParameters();
+});
+$('#input-Thickness').on('input', function(){
+    $('#slide-Thickness').val($(this).val());
+    refreshDrawingParameters();
+});
+
+$('#slide-ThicknessDelta').on('input',function () {
+    $("#input-ThicknessDelta").val($(this).val());
+    refreshDrawingParameters();
+});
+$('#input-ThicknessDelta').on('input', function(){
+    $('#slide-ThicknessDelta').val($(this).val());
+    refreshDrawingParameters();
+});
 
 $('#addRuleDivBtt').on('click', function(){
    addRuleDiv();
@@ -111,6 +128,11 @@ $('#preset5').on('click', function () {
 
 $('#preset6').on('click', function () {
     loadPreset(6);
+    extractLSystemConfig();
+});
+
+$('#preset7').on('click', function () {
+    loadPreset(7);
     extractLSystemConfig();
 });
 
@@ -206,8 +228,6 @@ function drawPolygons(polygons) {
         const colorIndex = polygons[i];
         const color = colorPalette[colorIndex];
         i++;
-
-        console.log("Color Index:", colorIndex, "Color:", color);
 
         // Read vertices
         var vertices = new Array(vertexCount);
@@ -305,6 +325,8 @@ function refreshDrawingParameters() {
     drawingParams.set_step($('#slide-Step').val());
     drawingParams.set_start_position(startX, startY);
     drawingParams.set_color_palette_size(3);
+    drawingParams.set_initial_line_width($('#slide-Thickness').val());
+    drawingParams.set_line_width_delta($('#slide-ThicknessDelta').val());
 
     lsystem.set_draw_parameters(drawingParams);
 
@@ -406,7 +428,9 @@ function addInterpDiv() {
                     <optgroup label="Special">       
                         <option value="6">Ignore</option>   
                         <option value="16">Increment Color</option>   
-                        <option value="17">Decrement Color</option>   
+                        <option value="17">Decrement Color</option>
+                        <option value="18">Increment Line Width</option>   
+                        <option value="19">Decrement Line Width</option>  
                     </optgroup>         
                  </select>
                  <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
@@ -451,6 +475,16 @@ function setIterations(x) {
     $('#slide-Iters').val(x);
 }
 
+function setLineWidth(x) {
+    $('#input-Thickness').val(x);
+    $('#slide-Thickness').val(x);
+}
+
+function setLineWidthDelta(x) {
+    $('#input-ThicknessDelta').val(x);
+    $('#slide-ThicknessDelta').val(x);
+}
+
 function setPosition(x, y) {
     startX = x;
     startY = y;
@@ -460,12 +494,20 @@ function setAxiom(x) {
     $("#inputAxiom").val(x);
 }
 
+function setColor(idx, clr) {
+    colorPalette[idx] = clr;
+    $("#color" + (idx + 1)).css('background-color', "#" + clr.getHexString());
+}
+
+
 function loadPenrose() {
     setStart(55);
     setDelta(36);
     setStep(0.468);
     setIterations(3);
     setPosition(-1, 0);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("[7]++[7]++[7]++[7]++[7]");
 
@@ -491,6 +533,8 @@ function loadSirpinski() {
     setStep(0.45);
     setIterations(4);
     setPosition(0, -3);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("F-G-G");
 
@@ -509,6 +553,8 @@ function loadLeaf() {
     setStep(0.45);
     setIterations(9);
     setPosition(-2, -2);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("G+GG+G[A][B]");
 
@@ -536,6 +582,8 @@ function loadSirpinski2() {
     setStep(0.5);
     setIterations(4);
     setPosition(-1, 0);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("F-G-G");
 
@@ -548,12 +596,51 @@ function loadSirpinski2() {
     addInterp("+", "3");
 }
 
+function loadBush() {
+    setStart(270);
+    setDelta(22.5);
+    setStep(0.1);
+    setIterations(7);
+    setPosition(-1, 2);
+    setLineWidth(6);
+    setLineWidthDelta(1);
+
+    setColor(0, new three.Color("#6A4706"));
+    setColor(1, new three.Color("#67E200"));
+
+    setAxiom("A");
+
+    addRule("A", "[&FLA]/////'[&FLA]///////'[&FLA]");
+    addRule("F", "S/////F");
+    addRule("S", "FL");
+    addRule("L", "[!''''^^{.-f.+f.+f.-|-f.+f.+f.}]");
+
+    addInterp("F", "0");
+    addInterp("f", "1");
+    addInterp("-", "2");
+    addInterp("+", "3");
+    addInterp("^", "9");
+    addInterp("&", "8");
+    addInterp("/", "11");
+    addInterp("\\", "10");
+    addInterp("|", "12");
+    addInterp("[", "4");
+    addInterp("]", "5");
+    addInterp("{", "13");
+    addInterp(".", "15");
+    addInterp("}", "14");
+    addInterp("!", "16");
+    addInterp("\'", "19");
+}
+
 function loadFlower() {
     setStart(270);
     setDelta(23);
     setStep(0.03);
     setIterations(6);
     setPosition(0, 2);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("X");
 
@@ -574,6 +661,8 @@ function loadKoch2() {
     setStep(0.33333);
     setIterations(3);
     setPosition(-1, -1);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("F--F--F");
 
@@ -590,6 +679,8 @@ function loadKoch() {
     setStep(0.2);
     setIterations(3);
     setPosition(-3, -2);
+    setLineWidth(1);
+    setLineWidthDelta(0.1);
 
     setAxiom("F--F--F");
 
@@ -603,6 +694,8 @@ function loadKoch() {
 function loadPreset(idx) {
     $('#interp-div').empty();
     $('#rules-div').empty();
+
+    clearColors();
 
     interpDivCounter = 0;
     ruleDivCounter = 0;
@@ -629,6 +722,9 @@ function loadPreset(idx) {
             break;
         case 6:
             loadLeaf();
+            break;
+        case 7:
+            loadBush();
             break;
     }
 }
@@ -712,6 +808,10 @@ function retrieveDrawOperation(input) {
             return DrawOperation.IncrementColor;
         case "17":
             return DrawOperation.DecrementColor;
+        case "18":
+            return DrawOperation.IncrementLineWidth;
+        case "19":
+            return DrawOperation.DecrementLineWidth;
     }
 }
 
@@ -761,6 +861,12 @@ function extractLSystemConfig() {
 
 extractLSystemConfig();
 
+function clearColors() {
+    setColor(0, new three.Color(0xFFFFFF));
+    setColor(1, new three.Color(0xFFFFFF));
+    setColor(2, new three.Color(0xFFFFFF));
+}
+
 /**
  * Draw a list of line segments.
  *
@@ -770,15 +876,26 @@ extractLSystemConfig();
 function drawLines(lines) {
     var i = 0;
 
+    var geometries = [];
+    var colorArrays = [];
+    var widths = [];
+
+
     var geometry = new three.Geometry();
 
     var clrs = [];
+
+    var first = true;
+    var oldWidth = 0.0;
 
     while(i < lines.length)
     {
         const clrIdx = lines[i];
         i++;
         const color = colorPalette[clrIdx];
+
+        const width = lines[i];
+        i++;
 
         var beginVertex = new three.Vector3(
             lines[i],
@@ -796,23 +913,53 @@ function drawLines(lines) {
 
         i = i + 3;
 
-        clrs.push(color);
-        clrs.push(color);
+        if(first) {
+            first = false;
+        } else if(oldWidth !== width) {
+            geometries.push(geometry);
+            colorArrays.push(clrs);
+            widths.push(oldWidth);
 
-        geometry.vertices.push(beginVertex, endVertex);
+            geometry = new three.Geometry();
+            clrs = [];
+        }
+
+        oldWidth = width;
+
+        if(width >= 0.9) {
+            clrs.push(color);
+            clrs.push(color);
+
+            geometry.vertices.push(beginVertex, endVertex);
+        }
     }
 
-    for(var i=0; i<geometry.vertices.length; i++) {
-        geometry.colors[i] = clrs[i];
+    geometries.push(geometry);
+    colorArrays.push(clrs);
+    widths.push(oldWidth);
+
+
+
+    for(var k=0; k < geometries.length; k++) {
+        var geometry_ = geometries[k];
+        var clrs_ = colorArrays[k];
+        var width_ = widths[k];
+
+        for (var i = 0; i < geometry_.vertices.length; i++) {
+            geometry_.colors[i] = clrs_[i];
+        }
+
+
+
+        var material = new three.LineBasicMaterial({
+            color: 0xffffff,
+            vertexColors: three.VertexColors,
+            linewidth: width_
+        });
+
+        var line = new three.LineSegments(geometry_, material);
+        scene.add(line);
     }
-
-    var material = new three.LineBasicMaterial({
-        color: 0xffffff,
-        vertexColors: three.VertexColors
-    });
-
-    var line = new three.LineSegments(geometry, material);
-    scene.add(line);
 }
 
 $(function () {

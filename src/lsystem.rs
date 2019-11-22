@@ -26,7 +26,9 @@ pub struct DrawingParameters {
 	start_angle: f64,
 	angle_delta: f64,
 	step: f64,
-	color_palette_size: u32
+	color_palette_size: u32,
+	initial_line_width: f64,
+	line_width_delta: f64
 }
 
 #[wasm_bindgen]
@@ -37,8 +39,18 @@ impl DrawingParameters {
 			start_angle: 0.0,
 			angle_delta: 45.0,
 			step: 1.0,
-			color_palette_size: 1
+			color_palette_size: 1,
+			initial_line_width: 1.0,
+			line_width_delta: 0.1
 		}	
+	}
+
+	pub fn set_initial_line_width(&mut self, width: f64) {
+		self.initial_line_width = width;
+	}
+
+	pub fn set_line_width_delta(&mut self, delta: f64) {
+		self.line_width_delta = delta;
 	}
 
 	pub fn set_start_position(&mut self, x: i32, y: i32) {
@@ -261,6 +273,7 @@ impl LSystemInterface {
 
 		for segment in &self.lsystem.line_segments {
 			data.push(segment.color as f64);
+			data.push(segment.width);
 			data.push(segment.begin.x);
 			data.push(segment.begin.y);
 			data.push(segment.begin.z);
