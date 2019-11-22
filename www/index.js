@@ -3,6 +3,12 @@ import { LSystemInterface, DrawOperation, DrawingParameters } from "lsystems-web
 import { memory } from "lsystems-web/lsystems_web_bg";
 import * as three from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
+import "jquery";
+import "popper.js";
+import "bootstrap-select";
+import "bootstrap-slider"
+import "bootstrap-colorpicker"
+import "bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css"
 
 var $ = require("jquery");
 
@@ -12,7 +18,9 @@ var interpDivCounter = 0;
 var startX = 0;
 var startY = 0;
 
-var drawWireframe = true;
+var colorPalette = [ new three.Color(255, 255, 255), new three.Color(255, 255, 255), new three.Color(255, 255, 255) ];
+
+var drawWireframe = false;
 
 $('#slide-StartAngle').on('input',function () {
     $("#input-StartAngle").val($(this).val());
@@ -71,11 +79,72 @@ $('#slide-Iters').on('input', function () {
     extractLSystemConfig();
 });
 
-$('#loadPreset').on('click', function () {
-    loadPreset();
+$('#preset0').on('click', function () {
+    loadPreset(0);
     extractLSystemConfig();
 });
 
+$('#preset1').on('click', function () {
+    loadPreset(1);
+    extractLSystemConfig();
+});
+
+$('#preset2').on('click', function () {
+    loadPreset(2);
+    extractLSystemConfig();
+});
+
+$('#preset3').on('click', function () {
+    loadPreset(3);
+    extractLSystemConfig();
+});
+
+$('#preset4').on('click', function () {
+    loadPreset(4);
+    extractLSystemConfig();
+});
+
+$('#preset5').on('click', function () {
+    loadPreset(5);
+    extractLSystemConfig();
+});
+
+$('#preset6').on('click', function () {
+    loadPreset(6);
+    extractLSystemConfig();
+});
+
+$('#chkBoxWireframe').on('click', function () {
+    drawWireframe = $('#chkBoxWireframe').is(":checked");
+    refreshScene();
+});
+
+$('#color1').colorpicker();
+
+$('#color1').on('changeColor', function(event) {
+    $('#color1').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[0] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
+
+$('#color2').colorpicker();
+
+$('#color2').on('changeColor', function(event) {
+    $('#color2').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[1] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
+
+$('#color3').colorpicker();
+
+$('#color3').on('changeColor', function(event) {
+    $('#color3').css('background-color', event.color.toString());
+    const clr = event.color.toRGB();
+    colorPalette[2] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
+    refreshScene();
+});
 
 
 var canvas = document.getElementById('rendertarget');
@@ -110,9 +179,7 @@ drawingParms.set_angle_delta_degrees(60.0);
 
 var lsystem = LSystemInterface.new();
 
-loadPreset();
-
-
+loadPreset(3);
 
 window.addEventListener('resize', onWindowResize, false);
 
@@ -134,6 +201,13 @@ function drawPolygons(polygons) {
         // Read number of vertices
         const vertexCount = polygons[i];
         i++;
+
+        // Read color
+        const colorIndex = polygons[i];
+        const color = colorPalette[colorIndex];
+        i++;
+
+        console.log("Color Index:", colorIndex, "Color:", color);
 
         // Read vertices
         var vertices = new Array(vertexCount);
@@ -161,9 +235,11 @@ function drawPolygons(polygons) {
 
         geometry.setAttribute('position', new three.Float32BufferAttribute(rawVertices, 3));
 
+        geometry.computeVertexNormals();
+
         if(drawWireframe) {
             var material = new three.MeshPhongMaterial( {
-                color: 0xff0000,
+                color: color,
                 polygonOffset: true,
                 polygonOffsetFactor: 1, // positive value pushes polygon further away
                 polygonOffsetUnits: 1
@@ -179,7 +255,7 @@ function drawPolygons(polygons) {
             mesh.add( wireframe );
 
         } else {
-            var material = new three.MeshBasicMaterial({color: 0xFFFFFF});
+            var material = new three.MeshPhongMaterial({ ambient: color, color: color, specular: color, shininess: 30 });
             material.side = three.DoubleSide;
             var mesh = new three.Mesh(geometry, material);
             mesh.drawMode = three.TriangleFanDrawMode;
@@ -193,6 +269,14 @@ function drawPolygons(polygons) {
 
 function refreshScene() {
     scene = new three.Scene();
+
+    var light = new three.AmbientLight(0x404040);
+    var light2 = new three.DirectionalLight(0x404040);
+    light2.position.set( 0, 1, 1 ).normalize();
+
+    scene.add(light);
+    scene.add(light2);
+
 
     retrieveLines();
     retrievePolygons();
@@ -220,6 +304,7 @@ function refreshDrawingParameters() {
     drawingParams.set_start_angle_degrees($('#slide-StartAngle').val());
     drawingParams.set_step($('#slide-Step').val());
     drawingParams.set_start_position(startX, startY);
+    drawingParams.set_color_palette_size(3);
 
     lsystem.set_draw_parameters(drawingParams);
 
@@ -250,13 +335,13 @@ function addRuleDiv() {
     var rightsideid = 'rulerightside' + ruleDivCounter;
 
     var div = $('<div></div>')
-        .prop('class', 'line')
+        .prop('class', 'ruleline')
         .prop('id', id)
         .html(`
                  <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>
                  <span width="40%">-></span>
                  <input id=${rightsideid} class="ruleboxright" type="text"/>
-                 <button id=${bttid} type="button" class="rightbutton">-</button>
+                 <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
             `);
 
     $('#rules-div').append(div);
@@ -296,25 +381,35 @@ function addInterpDiv() {
         .html(`
                  <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>
                  <span>-></span>
-                 <select class="ruleboxright" id=${rightsideid}>
-                    <option value="0">Forward</option>
-                    <option value="1">Forward (no draw)</option>
-                    <option value="7">Forward (contracting)</option>
-                    <option value="2">Turn Right</option>
-                    <option value="3">Turn Left</option>
-                    <option value="9">Pitch Up</option>
-                    <option value="8">Pitch Down</option>               
-                    <option value="10">Roll Left</option>
-                    <option value="11">Roll Right</option>
-                    <option value="12">Turn Around</option>
-                    <option value="4">Save State</option>
-                    <option value="5">Load State</option>                  
-                    <option value="13">Begin Polygon</option>
-                    <option value="15">Submit Vertex</option>
-                    <option value="14">End Polygon</option>                    
-                    <option value="6">Ignore</option>          
+                 <select id=${rightsideid} data-dropup-auto="false">
+                    <optgroup label="Movement">
+                        <option value="0">Forward</option>
+                        <option value="1">Forward (no draw)</option>
+                        <option value="7">Forward (contracting)</option>
+                        <option value="2">Turn Right</option>
+                        <option value="3">Turn Left</option>
+                        <option value="9">Pitch Up</option>
+                        <option value="8">Pitch Down</option>               
+                        <option value="10">Roll Left</option>
+                        <option value="11">Roll Right</option>
+                        <option value="12">Turn Around</option>
+                    </optgroup>
+                    <optgroup label="State Handling">
+                        <option value="4">Save State</option>
+                        <option value="5">Load State</option>    
+                    </optgroup>         
+                    <optgroup label="Polygons">
+                        <option value="13">Begin Polygon</option>
+                        <option value="15">Submit Vertex</option>
+                        <option value="14">End Polygon</option>       
+                    </optgroup>      
+                    <optgroup label="Special">       
+                        <option value="6">Ignore</option>   
+                        <option value="16">Increment Color</option>   
+                        <option value="17">Decrement Color</option>   
+                    </optgroup>         
                  </select>
-                 <button id=${bttid} type="button" class="rightbutton">-</button>
+                 <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
             `);
 
     $('#interp-div').append(div);
@@ -323,13 +418,15 @@ function addInterpDiv() {
         extractLSystemConfig();
     });
 
-    $('#' + rightsideid).on('input', function(){
+    $('#' + rightsideid).on('change', function(){
         extractLSystemConfig();
     });
 
     $('#' + bttid).on('click', function(){
         handleRemoveRule(id);
     });
+
+    $('select').selectpicker();
 
     interpDivCounter++;
 }
@@ -417,9 +514,10 @@ function loadLeaf() {
 
     addRule("A", "[+A{.].C.}");
     addRule("B", "[-B{.].C.}");
-    addRule("C", "^GvC");
+    addRule("C", "^FvC");
 
     addInterp("G", "0");
+    addInterp("F", "1");
     addInterp("-", "2");
     addInterp("+", "3");
     addInterp("[", "4");
@@ -502,35 +600,34 @@ function loadKoch() {
     addInterp("+", "3");
 }
 
-function loadPreset() {
+function loadPreset(idx) {
     $('#interp-div').empty();
     $('#rules-div').empty();
 
     interpDivCounter = 0;
     ruleDivCounter = 0;
 
-    var presetId = $('#selectPreset').val();
 
-    switch(presetId) {
-        case "0":
+    switch(idx) {
+        case 0:
             loadFlower();
             break;
-        case "1":
+        case 1:
             loadKoch();
             break;
-        case "4":
+        case 4:
             loadKoch2();
             break;
-        case "2":
+        case 2:
             loadSirpinski();
             break;
-        case "5":
+        case 5:
             loadSirpinski2();
             break;
-        case "3":
+        case 3:
             loadPenrose();
             break;
-        case "6":
+        case 6:
             loadLeaf();
             break;
     }
@@ -574,6 +671,7 @@ function addInterp(left, right) {
 
     $('#interpleftside' + idx).val(left);
     $('#interprightside' + idx).val(right);
+    $('#interprightside' + idx).selectpicker('render');
 }
 
 function retrieveDrawOperation(input) {
@@ -610,6 +708,10 @@ function retrieveDrawOperation(input) {
             return DrawOperation.EndPolygon;
         case "15":
             return DrawOperation.SubmitVertex;
+        case "16":
+            return DrawOperation.IncrementColor;
+        case "17":
+            return DrawOperation.DecrementColor;
     }
 }
 
@@ -665,53 +767,57 @@ extractLSystemConfig();
  * @param lines An array of float values. three values make up a vertex, and two vertices make up a line.
  * @param color The line color, white per default.
  */
-function drawLines(lines, color = 0xFFFFFF) {
-    // Determine how many vertices are contained in the parameter array
-    if(lines.length % 3 !== 0) {
-        console.error("Expected array of 3D vertices, but length does not match up")
-        return
-    }
-
-    var numVertices = lines.length / 3;
-    var numLineSegments = numVertices / 2;
-
-    // Check that there is an even number of vertices, since each line segment consists
-    // of both a begin and end position.
-    if(numVertices % 2 !== 0) {
-        console.error("Expected even number of vertices");
-        return
-    }
+function drawLines(lines) {
+    var i = 0;
 
     var geometry = new three.Geometry();
 
-    for(var i = 0; i < numLineSegments; i++)
+    var clrs = [];
+
+    while(i < lines.length)
     {
-        var startIdx = 6*i;
-        var beginVertexIdx = startIdx;
-        var endVertexIdx = startIdx + 3;
+        const clrIdx = lines[i];
+        i++;
+        const color = colorPalette[clrIdx];
 
         var beginVertex = new three.Vector3(
-            lines[beginVertexIdx + 0],
-            -lines[beginVertexIdx + 1],
-            lines[beginVertexIdx + 2]
+            lines[i],
+            -lines[i+1],
+            lines[i+2]
         );
 
+        i = i + 3;
+
         var endVertex = new three.Vector3(
-            lines[endVertexIdx + 0],
-            -lines[endVertexIdx + 1],
-            lines[endVertexIdx + 2]
+            lines[i],
+            -lines[i+1],
+            lines[i+2]
         );
+
+        i = i + 3;
+
+        clrs.push(color);
+        clrs.push(color);
 
         geometry.vertices.push(beginVertex, endVertex);
     }
+
+    for(var i=0; i<geometry.vertices.length; i++) {
+        geometry.colors[i] = clrs[i];
+    }
+
     var material = new three.LineBasicMaterial({
-        color: color
+        color: 0xffffff,
+        vertexColors: three.VertexColors
     });
 
     var line = new three.LineSegments(geometry, material);
     scene.add(line);
 }
 
+$(function () {
+    $('select').selectpicker();
+});
 
 function animate()
 {
@@ -721,3 +827,4 @@ function animate()
 }
 
 animate();
+

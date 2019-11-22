@@ -25,7 +25,8 @@ pub struct DrawingParameters {
 	start_position: Position2D,
 	start_angle: f64,
 	angle_delta: f64,
-	step: f64
+	step: f64,
+	color_palette_size: u32
 }
 
 #[wasm_bindgen]
@@ -35,7 +36,8 @@ impl DrawingParameters {
 			start_position: Position2D{ x: 0, y: 0 },
 			start_angle: 0.0,
 			angle_delta: 45.0,
-			step: 1.0
+			step: 1.0,
+			color_palette_size: 1
 		}	
 	}
 
@@ -61,6 +63,10 @@ impl DrawingParameters {
 
 	pub fn set_step(&mut self, step: f64) {
 		self.step = step;
+	}
+
+	pub fn set_color_palette_size(&mut self, size: u32) {
+		self.color_palette_size = size;	
 	}
 }
 
@@ -254,6 +260,7 @@ impl LSystemInterface {
 		let mut data = Vec::new();
 
 		for segment in &self.lsystem.line_segments {
+			data.push(segment.color as f64);
 			data.push(segment.begin.x);
 			data.push(segment.begin.y);
 			data.push(segment.begin.z);
@@ -276,6 +283,7 @@ impl LSystemInterface {
 
 		for polygon in &self.lsystem.polygons {
 			data.push(polygon.vertices.len() as f64);
+			data.push(polygon.color as f64);
 	
 			for vertex in &polygon.vertices {
 				data.push(vertex.x);

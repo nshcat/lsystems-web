@@ -1,70 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:width="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8">
     <title>lsystems-web</title>
+	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 	  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Questrial">
+	  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+	  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.js"></script>
+	  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.css">
 	  <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
 	<div id="page">
 		<div id="left" class="box">
-			<div class="line">
-				<span class="label">Presets:</span>
-				<select id="selectPreset">
-					<option value="3">Penrose</option>
-					<option value="0">Plant</option>
-					<option value="1">Koch Snowflake</option>
-					<option value="4">Koch Snowflake (alt)</option>
-					<option value="2">Sirpinski Triangle</option>
-					<option value="5">Sirpinski Triangle (alt)</option>
-					<option value="6">Leaf (3D)</option>
-				</select>
-				<button id="loadPreset">Load</button>
-			</div>
-			<div class="line"><span class="label">Drawing Parameters:</span></div>
-			<div class="line">
-				<span class="label">Starting Angle:</span>
-				<input id="slide-StartAngle" type="range" min="0" max="360" step="1" value="65">
-				<input class="sliderbox" width=10px id="input-StartAngle" name="value" value="65">
-			</div>
-			<div class="line">
-				<span class="label">Angle Delta:</span>
-				<input id="slide-AngleDelta" type="range" min="0" max="360" step="1" value="23">
-				<input class="sliderbox" width=10px id="input-AngleDelta" name="value" value="23">
-			</div>
-			<div class="line">
-				<span class="label">Step:</span>
-				<input id="slide-Step" type="range" min="0" max="10" step="0.002" value="0.03">
-				<input class="sliderbox" width=10px id="input-Step" name="value" value="0.03">
-			</div>
-			<div class="line">
-				<span class="label">Iterations:</span>
-				<input id="slide-Iters" type="range" min="0" max="10" step="1" value="6">
-				<input class="sliderbox" width=10px id="input-Iters" name="value" value="6">
-			</div>
-			<div class="line">
-				<span class="label">Axiom:</span>
-				<input id="inputAxiom" type="input">
-			</div>
-			<div class="line">
-				<span class="label">Rules:</span>
-			</div>
-			<div id="rules-div">
+			<ul class="nav nav-tabs">
+				<li class="active"><a data-toggle="tab" href="#params">Parameters</a></li>
+				<li><a data-toggle="tab" href="#rules">Rules</a></li>
+				<li><a data-toggle="tab" href="#interp">Interpretation</a></li>
+				<li><a data-toggle="tab" href="#colors">Colors</a></li>
+				<li class="dropdown">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">Presets
+						<span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#" id="preset3">Penrose</a></li>
+						<li><a href="#" id="preset0">Plant</a></li>
+						<li><a href="#" id="preset1">Koch Snowflake</a></li>
+						<li><a href="#" id="preset4">Koch Snowflake (alt)</a></li>
+						<li><a href="#" id="preset2">Sirpinski Triangle</a></li>
+						<li><a href="#" id="preset5">Sirpinski Triangle (alt)</a></li>
+						<li><a href="#" id="preset6">Leaf (3D)</a></li>
+					</ul>
+				</li>
+			</ul>
 
-			</div>
-			<div class="line">
-				<button id="addRuleDivBtt" type="button" class="rightbutton">+</button>
-			</div>
-			</br></br>
-			<div class="line">
-				<span class="label">Interpretations:</span>
-			</div>
-			<div id="interp-div">
+			<div class="tab-content">
+				<div id="params" class="tab-pane in active">
+					<div class="line">
+						<div class="form-group form-inline">
+							<h5>Starting Angle:</h5>
+							<input id="slide-StartAngle" class="slider form-control" type="range" min="0" max="360" step="1" value="65">
+							<input class="sliderbox" width=60px id="input-StartAngle" name="value" value="65">
+						</div>
+						<div class="form-group form-inline">
+							<h5>Angle Delta:</h5>
+							<input id="slide-AngleDelta" class="slider form-control" type="range" min="0" max="360" step="1" value="23">
+							<input class="sliderbox" width=10px id="input-AngleDelta" name="value" value="23">
+						</div>
+						<div class="form-group form-inline">
+							<h5>Step:</h5>
+							<input id="slide-Step" class="slider form-control" type="range" min="0" max="10" step="0.002" value="0.03">
+							<input class="sliderbox" width=10px id="input-Step" name="value" value="0.03">
+						</div>
+						<div class="form-group form-inline">
+							<h5>Iterations:</h5>
+							<input id="slide-Iters" class="slider form-control" type="range" min="0" max="10" step="1" value="6">
+							<input class="sliderbox" width=10px id="input-Iters" name="value" value="6">
+						</div>
+						<div class="checkbox">
+							<label><input id="chkBoxWireframe" type="checkbox">Draw polygons with wireframe</label>
+						</div>
+					</div>
+				</div>
+				<div id="rules" class="tab-pane">
+					<div class="line">
+						<h5>Axiom:</h5>
+						<input id="inputAxiom" type="input">
+					</div>
+					<div class="line">
+						<h5>Rules:</h5>
+					</div>
+					<div id="rules-div">
 
-			</div>
-			<div class="line">
-				<button id="addInterpDivBtt" type="button" class="rightbutton">+</button>
+					</div>
+					<div class="ruleline">
+						<button id="addRuleDivBtt" type="button" class="btn btn-primary rightbutton">+</button>
+					</div>
+				</div>
+				<div id="interp" class="tab-pane">
+					<div class="line">
+						<span class="label">Interpretations:</span>
+					</div>
+					<div id="interp-div">
+
+					</div>
+					<div class="line">
+						<button id="addInterpDivBtt" type="button" class="btn btn-primary rightbutton">+</button>
+					</div>
+				</div>
+				<div id="colors" class="tab-pane">
+					<div class="clrline input-color">
+						Color 1:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color1" style="background-color: #FFFFFF;"></div>
+						<!-- Replace "#FF850A" to change the color -->
+					</div>
+					<div class="clrline input-color">
+						Color 2:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color2" style="background-color: #FFFFFF;"></div>
+						<!-- Replace "#FF850A" to change the color -->
+					</div>
+					<div class="clrline input-color">
+						Color 3:
+						<input type="text" value="rgb(255, 255, 255)"  hidden />
+						<div class="color-box" id="color3" style="background-color: #FFFFFF;"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div id="right" class="box">

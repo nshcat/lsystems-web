@@ -12,5 +12,6 @@ pub struct Vertex {
 #[derive(Clone, Copy, Debug)]
 pub struct LineSegment {
 	pub begin: Vertex,
-	pub end: Vertex
+	pub end: Vertex,
+	pub color: i32
 }
