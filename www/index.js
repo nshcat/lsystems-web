@@ -21,56 +21,57 @@ var startY = 0;
 var colorPalette = [ new three.Color(255, 255, 255), new three.Color(255, 255, 255), new three.Color(255, 255, 255) ];
 
 var drawWireframe = false;
+var autoRefresh = true;
 
 $('#slide-StartAngle').on('input',function () {
     $("#input-StartAngle").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-StartAngle').on('input', function(){
     $('#slide-StartAngle').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#slide-AngleDelta').on('input',function () {
     $("#input-AngleDelta").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-AngleDelta').on('input', function(){
     $('#slide-AngleDelta').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#slide-Step').on('input',function () {
     $("#input-Step").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-Step').on('input', function(){
     $('#slide-Step').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#slide-Iters').on('input',function () {
     $("#input-Iters").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-Iters').on('input', function(){
     $('#slide-Iters').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 
 $('#slide-Thickness').on('input',function () {
     $("#input-Thickness").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-Thickness').on('input', function(){
     $('#slide-Thickness').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 
 $('#slide-ThicknessDelta').on('input',function () {
     $("#input-ThicknessDelta").val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 $('#input-ThicknessDelta').on('input', function(){
     $('#slide-ThicknessDelta').val($(this).val());
-    refreshDrawingParameters();
+    autoRefreshDrawingParameters();
 });
 
 $('#addRuleDivBtt').on('click', function(){
@@ -86,14 +87,20 @@ $('#refreshBtt').on('click', function(){
 });
 
 $('#inputAxiom').on('input', function () {
-    extractLSystemConfig();
+    if(autoRefresh) {
+        extractLSystemConfig();
+    }
 });
 
 $('#input-Iters').on('input', function () {
-    extractLSystemConfig();
+    if(autoRefresh) {
+        extractLSystemConfig();
+    }
 });
 $('#slide-Iters').on('input', function () {
-    extractLSystemConfig();
+    if(autoRefresh) {
+        extractLSystemConfig();
+    }
 });
 
 $('#preset0').on('click', function () {
@@ -136,10 +143,20 @@ $('#preset7').on('click', function () {
     extractLSystemConfig();
 });
 
+$('#refresh').on('click', function () {
+    extractLSystemConfig();
+});
+
+
 $('#chkBoxWireframe').on('click', function () {
     drawWireframe = $('#chkBoxWireframe').is(":checked");
-    refreshScene();
+    autoRefreshScene();
 });
+
+$('#chkBoxAutoReload').on('click', function () {
+    autoRefresh = $('#chkBoxAutoReload').is(":checked");
+});
+
 
 $('#color1').colorpicker();
 
@@ -147,7 +164,7 @@ $('#color1').on('changeColor', function(event) {
     $('#color1').css('background-color', event.color.toString());
     const clr = event.color.toRGB();
     colorPalette[0] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
-    refreshScene();
+    autoRefreshScene();
 });
 
 $('#color2').colorpicker();
@@ -156,7 +173,7 @@ $('#color2').on('changeColor', function(event) {
     $('#color2').css('background-color', event.color.toString());
     const clr = event.color.toRGB();
     colorPalette[1] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
-    refreshScene();
+    autoRefreshScene();
 });
 
 $('#color3').colorpicker();
@@ -165,9 +182,14 @@ $('#color3').on('changeColor', function(event) {
     $('#color3').css('background-color', event.color.toString());
     const clr = event.color.toRGB();
     colorPalette[2] = new three.Color(clr.r/255, clr.g/255, clr.b/255);
-    refreshScene();
+    autoRefreshScene();
 });
 
+function autoRefreshDrawingParameters() {
+    if(autoRefresh) {
+        refreshDrawingParameters();
+    }
+}
 
 var canvas = document.getElementById('rendertarget');
 //canvas.style.width ='100%';
@@ -215,6 +237,12 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 }
 
+
+function autoRefreshScene() {
+    if(autoRefresh) {
+        refreshScene();
+    }
+}
 
 function drawPolygons(polygons) {
     var i = 0;
@@ -369,11 +397,15 @@ function addRuleDiv() {
     $('#rules-div').append(div);
 
     $('#' + leftsideid).on('input', function(){
-        extractLSystemConfig();
+        if(autoRefresh) {
+            extractLSystemConfig();
+        }
     });
 
     $('#' + rightsideid).on('input', function(){
-        extractLSystemConfig();
+        if(autoRefresh) {
+            extractLSystemConfig();
+        }
     });
 
     $('#' + bttid).on('click', function(){
@@ -387,7 +419,10 @@ function addRuleDiv() {
 
 function handleRemoveInterp(id) {
     $('#'+id).remove();
-    extractLSystemConfig();
+
+    if(autoRefresh) {
+        extractLSystemConfig();
+    }
 }
 
 function addInterpDiv() {
@@ -439,11 +474,15 @@ function addInterpDiv() {
     $('#interp-div').append(div);
 
     $('#' + leftsideid).on('input', function(){
-        extractLSystemConfig();
+        if(autoRefresh) {
+            extractLSystemConfig();
+        }
     });
 
     $('#' + rightsideid).on('change', function(){
-        extractLSystemConfig();
+        if(autoRefresh) {
+            extractLSystemConfig();
+        }
     });
 
     $('#' + bttid).on('click', function(){
