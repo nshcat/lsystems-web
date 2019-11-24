@@ -223,7 +223,7 @@ drawingParms.set_angle_delta_degrees(60.0);
 
 var lsystem = LSystemInterface.new();
 
-loadPreset(3);
+loadPreset(1);
 
 window.addEventListener('resize', onWindowResize, false);
 
@@ -381,28 +381,20 @@ function addRuleDiv() {
     var id = 'rule' + ruleDivCounter;
     var bttid = 'removerule' + ruleDivCounter;
 
-    var leftsideid = 'ruleleftside' + ruleDivCounter;
-    var rightsideid = 'rulerightside' + ruleDivCounter;
+    var ruleid = 'ruletext' + ruleDivCounter;
 
     var div = $('<div></div>')
         .prop('class', 'ruleline')
         .prop('id', id)
         .html(`
-                 <input id=${leftsideid} class="ruleboxleft" maxlength="1" type="text"/>
-                 <span width="40%">-></span>
-                 <input id=${rightsideid} class="ruleboxright" type="text"/>
+                 <input id=${ruleid} class="ruleboxright" type="text"/>
                  <button id=${bttid} type="button" class="btn btn-danger rightbutton">-</button>
             `);
 
     $('#rules-div').append(div);
 
-    $('#' + leftsideid).on('input', function(){
-        if(autoRefresh) {
-            extractLSystemConfig();
-        }
-    });
 
-    $('#' + rightsideid).on('input', function(){
+    $('#' + ruleid).on('input', function(){
         if(autoRefresh) {
             extractLSystemConfig();
         }
@@ -550,11 +542,11 @@ function loadPenrose() {
 
     setAxiom("[7]++[7]++[7]++[7]++[7]");
 
-    addRule("6", "81++91----71[-81----61]++");
-    addRule("7", "+81--91[---61--71]+");
-    addRule("8", "-61++71[+++81++91]-");
-    addRule("9", "--81++++61[+91++++71]--71");
-    addRule("1", "");
+    addRule("6 -> 81++91----71[-81----61]++");
+    addRule("7 -> +81--91[---61--71]+");
+    addRule("8 -> -61++71[+++81++91]-");
+    addRule("9 -> --81++++61[+91++++71]--71");
+    addRule("1 -> ");
 
     addInterp("6", "0");
     addInterp("7", "0");
@@ -577,8 +569,8 @@ function loadSirpinski() {
 
     setAxiom("F-G-G");
 
-    addRule("F", "F-G+F+G-F");
-    addRule("G", "GG");
+    addRule("F -> F-G+F+G-F");
+    addRule("G -> GG");
 
     addInterp("F", "0");
     addInterp("G", "0");
@@ -597,9 +589,9 @@ function loadLeaf() {
 
     setAxiom("G+GG+G[A][B]");
 
-    addRule("A", "[+A{.].C.}");
-    addRule("B", "[-B{.].C.}");
-    addRule("C", "^FvC");
+    addRule("A -> [+A{.].C.}");
+    addRule("B -> [-B{.].C.}");
+    addRule("C -> ^FvC");
 
     addInterp("G", "0");
     addInterp("F", "1");
@@ -626,8 +618,8 @@ function loadSirpinski2() {
 
     setAxiom("F-G-G");
 
-    addRule("F", "F-G+F+G-F");
-    addRule("G", "GG");
+    addRule("F -> F-G+F+G-F");
+    addRule("G -> GG");
 
     addInterp("F", "7");
     addInterp("G", "7");
@@ -649,10 +641,10 @@ function loadBush() {
 
     setAxiom("A");
 
-    addRule("A", "[&FLA]/////'[&FLA]///////'[&FLA]");
-    addRule("F", "S/////F");
-    addRule("S", "FL");
-    addRule("L", "[!''''^^{.-f.+f.+f.-|-f.+f.+f.}]");
+    addRule("A -> [&FLA]/////'[&FLA]///////'[&FLA]");
+    addRule("F -> S/////F");
+    addRule("S -> FL");
+    addRule("L -> [!''''^^{.-f.+f.+f.-|-f.+f.+f.}]");
 
     addInterp("F", "0");
     addInterp("f", "1");
@@ -683,8 +675,8 @@ function loadFlower() {
 
     setAxiom("X");
 
-    addRule("X", "F+[[X]-X]-F[-FX]+X");
-    addRule("F", "FF");
+    addRule("X -> F+[[X]-X]-F[-FX]+X");
+    addRule("F -> FF");
 
     addInterp("F", "0");
     addInterp("X", "6");
@@ -705,7 +697,7 @@ function loadKoch2() {
 
     setAxiom("F--F--F");
 
-    addRule("F", "F+F--F+F");
+    addRule("F -> F+F--F+F");
 
     addInterp("F", "7");
     addInterp("-", "2");
@@ -723,7 +715,7 @@ function loadKoch() {
 
     setAxiom("F--F--F");
 
-    addRule("F", "F+F--F+F");
+    addRule("F -> F+F--F+F");
 
     addInterp("F", "0");
     addInterp("-", "2");
@@ -781,8 +773,8 @@ function loadPreset(idx) {
 
     $("#inputAxiom").val("X");
 
-    addRule("X", "F+[[X]-X]-F[-FX]+X");
-    addRule("F", "FF");
+    addRule("X -> F+[[X]-X]-F[-FX]+X");
+    addRule("F -> FF");
 
     addInterp("F", "0");
     addInterp("X", "6");
@@ -792,12 +784,11 @@ function loadPreset(idx) {
     addInterp("]", "5");
 }*/
 
-function addRule(left, right) {
+function addRule(rule) {
     addRuleDiv();
     var idx = ruleDivCounter - 1;
 
-    $('#ruleleftside' + idx).val(left);
-    $('#rulerightside' + idx).val(right);
+    $('#ruletext' + idx).val(rule);
 }
 
 function addInterp(left, right) {
@@ -860,7 +851,7 @@ function extractLSystemConfig() {
     lsystem.clear();
 
     // Retrieve axiom
-    lsystem.set_axiom($('#inputAxiom').val());
+    var axiom = $('#inputAxiom').val();
 
     // Retrieve iteration count
     lsystem.set_iterations($('#slide-Iters').val());
@@ -869,15 +860,24 @@ function extractLSystemConfig() {
     var rulesDiv = document.getElementById('rules-div');
     var numRules = rulesDiv.childNodes.length;
 
+    var rules = "";
+    var first = true;
+
     for(var ix = 0; ix < numRules; ++ix) {
         var childDiv = rulesDiv.childNodes[ix];
         var realIndex = childDiv.id.substr(4);
 
-        var left = $('#ruleleftside' + realIndex).val();
-        var right = $('#rulerightside' + realIndex).val();
+        var rule = $('#ruletext' + realIndex).val();
 
-        lsystem.set_rule(left, right);
+        if(first) {
+            first = false;
+            rules += rule;
+        } else {
+            rules += "\n" + rule;
+        }
     }
+
+    lsystem.set_rules_and_axiom(axiom, rules);
 
     // Retrieve interpretations
     var interpDiv = document.getElementById('interp-div');
