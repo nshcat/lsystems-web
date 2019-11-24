@@ -4,11 +4,14 @@ use std::string::*;
 use std::collections::*;
 use std::fmt::*;
 use crate::lsystem::turtle::DrawOperation;
-
+use crate::lsystem::weighted::*;
+use rand::*;
+use rand::rngs::*;
+use rand_xorshift::*;
+use rand::distributions::Distribution;
 
 trait Evaluatable {
 	type Result;
-
 	fn eval(&self, env: &Environment) -> Self::Result;
 }
 
@@ -494,6 +497,14 @@ pub struct Rule {
 	pub probability: f64
 }
 
+impl Rule {
+	/// Checks whether this rule always applies, i.e. has "100% chance". Note that this is not the same as having a probability
+	/// of 1.0, since the probability is more like a general weight, e.g. users could use integers aswell.	
+	pub fn is_deterministic(&self) -> bool {
+		self.probability < 0.0
+	}
+}
+
 impl Display for Rule {
 	fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 		write!(f, "{} ", self.pattern)?;
@@ -518,7 +529,8 @@ impl Display for Rule {
 pub struct IterationEngine {
 	pub module_string: Vec<Module>,
 	pub rules: Vec<Rule>,
-	pub iteration_depth: u32
+	pub iteration_depth: u32,
+	rng: StdRng
 }
 
 impl IterationEngine {
@@ -529,13 +541,34 @@ impl IterationEngine {
 	pub fn add_rule(&mut self, rule: Rule) {
 		self.rules.push(rule);	
 	}
+	
+	fn create_rng(seed: u64) -> StdRng {
+		let seedBytes = seed.to_be_bytes();
+		
+		let mut seedArray: [u8; 32] = [0; 32];
+
+		for (i,b) in seedBytes.iter().enumerate() {
+			seedArray[i] = *b;
+			seedArray[8+i] = *b+1;
+			seedArray[16+i] = *b+2;
+			seedArray[24+i] = *b+3;
+		}
+
+		let mut rng: StdRng = SeedableRng::from_seed(seedArray);
+		rng
+	}
 
 	pub fn new() -> IterationEngine {
 		IterationEngine {
 			module_string: Vec::new(),
 			rules: Vec::new(),
-			iteration_depth: 0		
+			iteration_depth: 0,
+			rng: Self::create_rng(2144123123732)
 		}	
+	}
+
+	pub fn set_seed(&mut self, seed: u64) {
+		self.rng = Self::create_rng(seed);
 	}
 
 	pub fn iterate(&mut self) {
@@ -556,25 +589,40 @@ impl IterationEngine {
 					context.right = Some(self.module_string[i+1].clone());
 				}
 
-				// Find a rule that matches
-				let mut was_found = false;
+				// Collect all rules that match
+				let mut matching_rules = Vec::new();
+
 				for rule in &self.rules {
 					if(rule.pattern.does_match(&context)) {
-						// We found a matching rule. Bind variables
-						let env = rule.pattern.bind(&context);
-
-						for template in &rule.right_side {
-							new_module_string.push(template.instantiate(&env));						
-						}
-
-						was_found = true;
-						break;
+						matching_rules.push(rule.clone());
 					}
 				}
 
-				// If no matching rule was found, the module is used as is
-				if(!was_found) {
+				// If its empty, we can do nothing
+				if(matching_rules.len() == 0) {
 					new_module_string.push(module.clone());
+				} else {
+					// Check if there are any rules that are deterministic. If so, apply first one of them.
+					let deterministic_matches: Vec<Rule> = matching_rules.clone().into_iter()
+						.filter(|r| r.is_deterministic())
+						.collect();
+
+					let chosen_match = match deterministic_matches.len() {
+						0 => {
+							let mut items: Vec<Weighted<Rule>> = matching_rules.into_iter().map(|r| Weighted{ weight: r.probability, item: r }).collect();
+							let wc = WeightedChoice::new(&mut items);
+							
+							wc.sample(&mut self.rng)
+						},
+						_ => deterministic_matches.first().unwrap().clone()
+					};
+
+					// We now have a match. Instantiate right side.
+					let env = chosen_match.pattern.bind(&context);
+
+					for template in &chosen_match.right_side {
+						new_module_string.push(template.instantiate(&env));						
+					}
 				}
 			}
 

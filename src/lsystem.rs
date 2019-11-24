@@ -3,6 +3,7 @@ mod line;
 mod turtle;
 mod engine;
 mod grammar;
+mod weighted;
 
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
