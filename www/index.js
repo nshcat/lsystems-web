@@ -103,6 +103,12 @@ $('#slide-Iters').on('input', function () {
     }
 });
 
+$('#input-Seed').on('input', function () {
+    if(autoRefresh) {
+        extractLSystemConfig();
+    }
+});
+
 $('#preset0').on('click', function () {
     loadPreset(0);
     extractLSystemConfig();
@@ -852,6 +858,10 @@ function extractLSystemConfig() {
 
     // Retrieve axiom
     var axiom = $('#inputAxiom').val();
+
+    var seed = $('#input-Seed').val();
+
+    lsystem.set_seed(seed);
 
     // Retrieve iteration count
     lsystem.set_iterations($('#slide-Iters').val());

@@ -108,7 +108,7 @@ parser!{
 			= ":" padding() p:number() { p }
 
 		rule probability_suffix() -> f64
-			= p:(probability())? { p.unwrap_or(1.0) }
+			= p:(probability())? { p.unwrap_or(-1.0) }
 
 		pub rule lsystem_rule() -> Rule
 			= p:pattern() padding()  prob:probability_suffix() padding() "->" padding() rightside:template_string() { Rule{ pattern: p, right_side: rightside, probability: prob } }

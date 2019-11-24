@@ -3,6 +3,7 @@ mod line;
 mod turtle;
 mod engine;
 mod grammar;
+mod weighted;
 
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
@@ -163,8 +164,8 @@ impl LSystem {
 	}
 
 	pub fn parse(&mut self, axiom: &str, rules: &str) {
-		self.engine.module_string = grammar::lsystem_parser::module_string(axiom).unwrap();
-		self.engine.rules = grammar::lsystem_parser::rule_list(rules).unwrap();
+		self.engine.module_string = grammar::lsystem_parser::module_string(axiom).unwrap_or(Vec::new());
+		self.engine.rules = grammar::lsystem_parser::rule_list(rules).unwrap_or(Vec::new());
 	}
 
 	pub fn new() -> LSystem {
@@ -211,6 +212,10 @@ impl LSystemInterface {
 
 	pub fn set_interpretation(&mut self, character: char, operation: DrawOperation) {
 		self.lsystem.interpretations.associate(character, operation);	
+	}
+
+	pub fn set_seed(&mut self, seed: u64) {
+		self.lsystem.engine.set_seed(seed);	
 	}
 
 	pub fn iterate(&mut self) {
