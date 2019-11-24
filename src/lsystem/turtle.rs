@@ -4,6 +4,7 @@ use crate::lsystem::DrawingParameters;
 use crate::lsystem::line::LineSegment;
 use crate::lsystem::Position2D;
 use crate::lsystem::line::Vertex;
+use crate::lsystem::engine::{DrawingModule};
 use std::num::*;
 use std::cmp::*;
 
@@ -78,8 +79,7 @@ impl Turtle2D {
 			cache_sin: draw_parameters.angle_delta.sin()
 		}	
 	}
-
-	pub fn execute(&mut self, commands: &[DrawOperation]) {
+	pub fn execute_operations(&mut self, commands: &[DrawOperation]) {
 		for command in commands {
 			match command {
 				DrawOperation::Forward => self.move_forward(self.draw_parameters.step, true),
@@ -300,7 +300,11 @@ impl Turtle3D {
 		self.current_state.line_width = (self.current_state.line_width + delta).max(0.0);	
 	}
 
-	pub fn execute(&mut self, commands: &[DrawOperation]) {
+	
+	pub fn execute_modules(&mut self, commands: &[DrawingModule]) {
+	}
+
+	pub fn execute_operations(&mut self, commands: &[DrawOperation]) {
 		for command in commands {
 			match command {
 				DrawOperation::Forward => self.move_forward(self.draw_parameters.step, true),

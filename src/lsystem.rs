@@ -1,12 +1,15 @@
 
 mod line;
 mod turtle;
+mod engine;
+mod grammar;
 
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use turtle::*;
 use line::*;
+use engine::*;
 use js_sys::Float64Array;
 use std::convert::TryInto;
 use crate::lsystem::turtle::Polygon;
@@ -111,44 +114,13 @@ impl InterpretationMap {
 	}
 }
 
-#[wasm_bindgen]
-pub struct IterationRules {
-	rule_map: HashMap<char, String>
-}
-
-impl IterationRules {
-	pub fn set_rule(&mut self, character: char, replacement: String) {
-		self.rule_map.remove(&character);
-		self.rule_map.insert(character, replacement);	
-	}
-
-	fn retrieve_rule(&mut self, character: char) -> String {
-		match self.rule_map.get(&character) {
-			Some(right_side) => return right_side.clone(),
-			None => panic!("Iteration map does not containt rule definition for character {}", character)
-		}
-	}
-
-	fn has_rule(& self, character: char) -> bool {
-		return self.rule_map.contains_key(&character);	
-	}
-
-	fn new() -> IterationRules {
-		return IterationRules {
-			rule_map: HashMap::new()	
-		}	
-	}
-}
 
 
 pub struct LSystem {
-	axiom: String,
-	iterations: u32,
-	rules: IterationRules,
-	interpretation_map: InterpretationMap,
-	parameters: DrawingParameters,
-	command_string: String,			// Drawing commands as source string. For debugging.
-	commands: Vec<DrawOperation>,  // List of drawing commands that can be interpreted using drawing parameters
+	engine: IterationEngine,
+	interpretations: InterpretationMap,
+	parameters: DrawingParameters,	
+	commands: Vec<DrawingModule>,  
 	line_segments: Vec<LineSegment>, // List of line segments which are the current interpretation of the lsystem based on the current drawing parameters
 	polygons: Vec<Polygon>
 }
@@ -158,61 +130,56 @@ impl LSystem {
 		self.parameters = DrawingParameters::clone(params);
 	}
 
-	pub fn interpret(&mut self) {
-		let mut turtle = Turtle3D::new(self.parameters, self.iterations);
+	// Perform L-System iteration by applying ruleset to axiom string
+	pub fn iterate(&mut self) {
+		self.engine.iterate();
 
-		turtle.execute(&self.commands);
+		let mut commands: Vec<DrawingModule> = Vec::new();
+		
+		for module in &self.engine.module_string {
+			if(self.interpretations.has_interpretation(module.identifier)) {
+				let operation = self.interpretations.retrieve(module.identifier);
+
+				let command = match module.parameter_count() {
+					0 => DrawingModule::new(operation),
+					1 => DrawingModule::new_with_parameter(operation, module.parameter_values[0]),
+					_ => panic!("Drawing operation can't have more than one parameters, but has {}", module.parameter_count())	
+				};
+
+				commands.push(command);
+			}
+		}
+
+		self.commands = commands.clone();
+	}
+
+	pub fn interpret(&mut self) {
+		let mut turtle = Turtle3D::new(self.parameters, self.engine.iteration_depth);
+
+		turtle.execute_modules(&self.commands);
 
 		self.line_segments = turtle.line_segments().clone();
 		self.polygons = turtle.polygons().clone();
 	}
 
-	// Perform L-System iteration by applying ruleset to axiom string
-	pub fn iterate(&mut self) {
-		let mut iterated_str = self.axiom.to_owned();
-
-		for ix in (0..self.iterations) {
-			let mut new_str = String::from("").to_owned();
-
-			for c in iterated_str.chars() {
-				let replacement = if self.rules.has_rule(c) { self.rules.retrieve_rule(c) } else { c.to_string() };
-				new_str = new_str + &replacement;
-			}
-
-			iterated_str = new_str;
-		}
-
-		let mut cmds = Vec::new();
-		
-		for c in iterated_str.chars() {
-			if(self.interpretation_map.has_interpretation(c)) {
-				let command = self.interpretation_map.retrieve(c);
-				cmds.push(command);		
-			}
-		}
-
-		self.commands = cmds;
-		self.command_string = iterated_str;
+	pub fn parse(&mut self, axiom: &str, rules: &str) {
+		self.engine.module_string = grammar::lsystem_parser::module_string(axiom).unwrap();
+		self.engine.rules = grammar::lsystem_parser::rule_list(rules).unwrap();
 	}
 
 	pub fn new() -> LSystem {
-		let mut x = LSystem {
-			iterations: 5,
-			rules: IterationRules::new(),
-			axiom: String::from(""),
-			command_string: String::from(""),
-			interpretation_map: InterpretationMap::new(),
+		LSystem {
+			engine: IterationEngine::new(),
+			interpretations: InterpretationMap::new(),
 			parameters: DrawingParameters::new(),
 			commands: Vec::new(),
 			line_segments: Vec::new(),
 			polygons: Vec::new()
-		};
+		}
+	}
 
-		/*x.line_segments.push(
-			LineSegment{ begin: Vertex{ x: 0.0, y:0.0, z:0.0 }, end: Vertex{ x: 1.0, y:1.0, z:1.0} }
-		);*/
-
-		return x;
+	pub fn set_iteration_depth(&mut self, depth: u32) {
+		self.engine.set_iteration_depth(depth);	
 	}
 }
 
@@ -231,23 +198,19 @@ impl LSystemInterface {
 	}
 
 	pub fn set_iterations(&mut self, iterations: u32) {
-		self.lsystem.iterations = iterations;	
-	}
-
-	pub fn set_axiom(&mut self, axiom: String) {
-		self.lsystem.axiom = axiom;
+		self.lsystem.set_iteration_depth(iterations);	
 	}
 
 	pub fn set_draw_parameters(&mut self, params: DrawingParameters) {
 		self.lsystem.set_drawing_parameters(&params);	
 	}
 
-	pub fn set_rule(&mut self, character: char, rule: String) {
-		self.lsystem.rules.set_rule(character, rule);
+	pub fn set_rules_and_axiom(&mut self, axiom: &str, rules: &str) {
+		self.lsystem.parse(axiom, rules);	
 	}
 
 	pub fn set_interpretation(&mut self, character: char, operation: DrawOperation) {
-		self.lsystem.interpretation_map.associate(character, operation);	
+		self.lsystem.interpretations.associate(character, operation);	
 	}
 
 	pub fn iterate(&mut self) {
@@ -258,9 +221,16 @@ impl LSystemInterface {
 		self.lsystem.interpret();	
 	}
 
-	pub fn retrieve_command_string(& self) -> String {
-		return self.lsystem.command_string.clone();
+	pub fn retrieve_final_string(& self) -> String {
+		let mut str = String::new();
+
+		for module in &self.lsystem.commands {
+			str = str + &format!("{}", module);
+		}
+
+		return str;
 	}
+
 
 	pub fn clear(&mut self) {
 		self.lsystem = LSystem::new();
