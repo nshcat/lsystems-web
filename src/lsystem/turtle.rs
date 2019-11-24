@@ -329,7 +329,7 @@ impl Turtle3D {
 				DrawingModule{operation: DrawOperation::PitchUp, parameter: p} =>  self.apply_rotation(self.rotLInv(p, self.matrix_cache.pitch_up)),
 				DrawingModule{operation: DrawOperation::RollLeft, parameter: p} =>  self.apply_rotation(self.rotH(p, self.matrix_cache.roll_left)),
 				DrawingModule{operation: DrawOperation::RollRight, parameter: p} =>  self.apply_rotation(self.rotHInv(p, self.matrix_cache.roll_right)),
-				DrawingModule{operation: DrawOperation::PitchDown, parameter: p} =>  self.apply_rotation(self.matrix_cache.turn_around),
+				DrawingModule{operation: DrawOperation::TurnAround, parameter: p} =>  self.apply_rotation(self.matrix_cache.turn_around),
 				
 				// Polygon handling
 				DrawingModule{operation: DrawOperation::BeginPolygon, ..} => self.begin_polygon(),
@@ -406,6 +406,7 @@ impl Turtle3D {
 
 	fn matrix_helper(&self, mat: fn(f64) -> Matrix3f, param: &Option<f64>, def: Matrix3f, md: f64) -> Matrix3f {
 		if(param.is_some()) {
+			panic!("");
 			mat(param.unwrap() * md)
 		} else {
 			def
