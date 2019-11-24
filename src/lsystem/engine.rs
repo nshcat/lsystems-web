@@ -381,6 +381,10 @@ impl ModulePattern {
 	pub fn does_match(& self, context: &ModuleContext) -> bool {
 		let mut env = Environment::new();
 
+		if(self.match_center.identifier != context.center.identifier) {
+			return false;
+		}
+
 		// Both centers have to have the exact same number of parameters
 		if(self.match_center.parameter_count() != context.center.parameter_count()) {
 			return false;		
@@ -397,6 +401,10 @@ impl ModulePattern {
 			let match_left = self.match_left.as_ref().unwrap();
 			let left = context.left.as_ref().unwrap();
 
+			if(match_left.identifier != left.identifier) {
+				return false;
+			}
+
 			if(match_left.parameter_count() != left.parameter_count()) {
 				return false;
 			}
@@ -412,6 +420,10 @@ impl ModulePattern {
 			// Check if parameter counts match
 			let match_right = self.match_right.as_ref().unwrap();
 			let right = context.right.as_ref().unwrap();
+
+			if(match_right.identifier != right.identifier) {
+				return false;
+			}
 
 			if(match_right.parameter_count() != right.parameter_count()) {
 				return false;

@@ -60,7 +60,13 @@ parser!{
 			= n:$(['+'|'-']?['0'..='9']+("." ['0'..='9']+)?) { n.parse().unwrap() }
 
 		rule identifier() -> char
-			= x:$(['a'..='z' | 'A'..='Z' | '!' | '^' | '+' | '\'' | '-' | '\\' | '/' | '|' | '~' | '#' | '&' | '{' | '}' | '.']) { x.parse().unwrap() }
+			= x:$(['a'..='z' | 'A'..='Z' | '0'..='9' | '!' | '^' | '+' | '\'' | '-' | '[' | ']' | '\\' | '/' | '|' | '~' | '#' | '&' | '{' | '}' | '.']) { x.parse().unwrap() }
+
+		rule condition() -> BooleanExpression
+			= expr:(condition_part())? { expr.unwrap_or(BooleanExpression::Const(true)) }
+
+		rule condition_part() -> BooleanExpression
+			= padding() ":" padding() expr:boolean_expr() { expr }
 	
 		rule parameter_name() -> char
 			= x:$(['a'..='z']) { x.parse().unwrap() }
@@ -81,7 +87,7 @@ parser!{
 			= padding() ">" padding() right:signature() { right }
 
 		rule pattern() -> ModulePattern
-			= left:(left_pattern())? center:signature() right:(right_pattern())? padding() ":" padding() expr:boolean_expr() { ModulePattern{ match_left: left, match_center: center, match_right: right, condition: expr } }
+			= left:(left_pattern())? center:signature() right:(right_pattern())? expr:condition() { ModulePattern{ match_left: left, match_center: center, match_right: right, condition: expr } }
 
 		rule simple_template() -> ModuleTemplate
 			= x:identifier() { ModuleTemplate{ identifier: x, parameter_expressions: Vec::new() } }
@@ -92,8 +98,11 @@ parser!{
 		pub rule template() -> ModuleTemplate
 			= template_with_parameters() / simple_template()
 
+		rule template_string_entry() -> ModuleTemplate
+			= padding() t:template() padding() { t }
+
 		rule template_string() -> Vec<ModuleTemplate>
-			= template()*
+			= template_string_entry()*
 
 		rule probability() -> f64
 			= ":" padding() p:number() { p }
@@ -114,7 +123,10 @@ parser!{
 			= module_with_parameters() / simple_module()
 
 		pub rule module_string() -> Vec<Module>
-			= module()*
+			= module_string_entry()*
+
+		rule module_string_entry() -> Module
+			= padding() m:module() padding() { m }
 
 		pub rule rule_list() -> Vec<Rule>
 			= rs:lsystem_rule() ** (padding() "\n" padding()) { rs }
