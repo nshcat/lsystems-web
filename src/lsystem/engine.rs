@@ -541,34 +541,18 @@ impl IterationEngine {
 	pub fn add_rule(&mut self, rule: Rule) {
 		self.rules.push(rule);	
 	}
-	
-	fn create_rng(seed: u64) -> StdRng {
-		let seedBytes = seed.to_be_bytes();
-		
-		let mut seedArray: [u8; 32] = [0; 32];
-
-		for (i,b) in seedBytes.iter().enumerate() {
-			seedArray[i] = *b;
-			seedArray[8+i] = *b+1;
-			seedArray[16+i] = *b+2;
-			seedArray[24+i] = *b+3;
-		}
-
-		let mut rng: StdRng = SeedableRng::from_seed(seedArray);
-		rng
-	}
 
 	pub fn new() -> IterationEngine {
 		IterationEngine {
 			module_string: Vec::new(),
 			rules: Vec::new(),
 			iteration_depth: 0,
-			rng: Self::create_rng(2144123123732)
+			rng: StdRng::seed_from_u64(133742)
 		}	
 	}
 
 	pub fn set_seed(&mut self, seed: u64) {
-		self.rng = Self::create_rng(seed);
+		self.rng = StdRng::seed_from_u64(seed)
 	}
 
 	pub fn iterate(&mut self) {

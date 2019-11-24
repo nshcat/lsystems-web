@@ -214,6 +214,10 @@ impl LSystemInterface {
 		self.lsystem.interpretations.associate(character, operation);	
 	}
 
+	pub fn set_seed(&mut self, seed: u64) {
+		self.lsystem.engine.set_seed(seed);	
+	}
+
 	pub fn iterate(&mut self) {
 		self.lsystem.iterate();
 	}
