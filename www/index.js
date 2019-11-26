@@ -1,5 +1,5 @@
 
-import { LSystemInterface, DrawOperation, DrawingParameters } from "lsystems-web";
+import { LSystemInterface, DrawOperation, DrawingParametersInterface } from "lsystems-web";
 import { memory } from "lsystems-web/lsystems_web_bg";
 import * as three from "three";
 import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
@@ -222,7 +222,7 @@ controls.keys = [ 65, 83, 68 ];
 
 camera.position.z = 5;
 
-var drawingParms = DrawingParameters.new();
+var drawingParms = DrawingParametersInterface.new();
 drawingParms.set_angle_delta_degrees(60.0);
 
 //loadDefaultRulesAndInterp();
@@ -352,7 +352,7 @@ function retrieveLines() {
 }
 
 function refreshDrawingParameters() {
-    var drawingParams = DrawingParameters.new();
+    var drawingParams = DrawingParametersInterface.new();
 
     drawingParams.set_angle_delta_degrees($('#slide-AngleDelta').val());
     drawingParams.set_start_angle_degrees($('#slide-StartAngle').val());
