@@ -36,7 +36,7 @@
     "jquery": "^3.4.1",
     "popper.js": "^1.14.3",
     "lsystems-web": "file:../pkg",
-    "three": "^0.110.0",
+    "three": "^0.137.0",
     "bootstrap": "^4.3.1",
     "bootstrap-colorpicker": "=2.5.3",
     "three-trackballcontrols": "^0.0.8",
